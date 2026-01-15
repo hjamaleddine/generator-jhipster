@@ -17,6 +17,7 @@ import io.github.jhipster.generator.generators.domain.DomainGenerator;
 import io.github.jhipster.generator.generators.springdata.SpringDataRelationalGenerator;
 import io.github.jhipster.generator.generators.feign.FeignClientGenerator;
 import io.github.jhipster.generator.generators.docker.DockerGenerator;
+import io.github.jhipster.generator.generators.docker.DockerComposeGenerator;
 import io.github.jhipster.generator.generators.server.security.SecurityGenerator;
 import io.github.jhipster.generator.generators.server.error.ErrorHandlingGenerator;
 import io.github.jhipster.generator.generators.server.audit.AuditGenerator;
@@ -26,6 +27,14 @@ import io.github.jhipster.generator.generators.server.cache.CacheGenerator;
 import io.github.jhipster.generator.generators.liquibase.LiquibaseGenerator;
 import io.github.jhipster.generator.generators.server.user.UserManagementGenerator;
 import io.github.jhipster.generator.generators.cicd.CiCdGenerator;
+import io.github.jhipster.generator.generators.swagger.SwaggerGenerator;
+import io.github.jhipster.generator.generators.metrics.MetricsGenerator;
+import io.github.jhipster.generator.generators.gateway.GatewayGenerator;
+import io.github.jhipster.generator.generators.kafka.SpringCloudStreamGenerator;
+import io.github.jhipster.generator.generators.elasticsearch.SpringDataElasticsearchGenerator;
+import io.github.jhipster.generator.generators.websocket.SpringWebSocketGenerator;
+import io.github.jhipster.generator.generators.jib.JibGenerator;
+import io.github.jhipster.generator.generators.codequality.CodeQualityGenerator;
 import io.github.jhipster.generator.template.JavaCodeBuilder;
 
 import java.util.*;
@@ -82,8 +91,23 @@ public class SpringBootGenerator extends BaseApplicationGenerator {
         // Cache generator
         composeWith(new CacheGenerator(context));
 
+        // Swagger/OpenAPI generator
+        composeWith(new SwaggerGenerator(context));
+
+        // Metrics generator (Micrometer, Prometheus)
+        composeWith(new MetricsGenerator(context));
+
+        // Code quality generator (Checkstyle, SpotBugs, JaCoCo)
+        composeWith(new CodeQualityGenerator(context));
+
         // Docker generator
         composeWith(new DockerGenerator(context));
+
+        // Docker Compose generator
+        composeWith(new DockerComposeGenerator(context));
+
+        // Jib generator for container builds
+        composeWith(new JibGenerator(context));
 
         // Database generator based on type
         if (isSql()) {
@@ -92,7 +116,26 @@ public class SpringBootGenerator extends BaseApplicationGenerator {
             // Liquibase generator for SQL databases
             composeWith(new LiquibaseGenerator(context));
         }
-        // Add other database generators: MongoDB, Cassandra, etc.
+
+        // Elasticsearch search engine
+        if ("elasticsearch".equals(config.getSearchEngine())) {
+            composeWith(new SpringDataElasticsearchGenerator(context));
+        }
+
+        // Message broker (Kafka/Pulsar)
+        if (config.getMessageBroker() != null && !"no".equals(config.getMessageBroker())) {
+            composeWith(new SpringCloudStreamGenerator(context));
+        }
+
+        // WebSocket support
+        if ("spring-websocket".equals(config.getWebsocket())) {
+            composeWith(new SpringWebSocketGenerator(context));
+        }
+
+        // Gateway generator for API Gateway applications
+        if ("gateway".equals(config.getApplicationType())) {
+            composeWith(new GatewayGenerator(context));
+        }
 
         // User management generator
         if (!config.isSkipUserManagement()) {
