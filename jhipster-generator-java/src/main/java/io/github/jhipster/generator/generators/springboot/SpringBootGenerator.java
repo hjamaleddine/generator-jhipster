@@ -17,6 +17,15 @@ import io.github.jhipster.generator.generators.domain.DomainGenerator;
 import io.github.jhipster.generator.generators.springdata.SpringDataRelationalGenerator;
 import io.github.jhipster.generator.generators.feign.FeignClientGenerator;
 import io.github.jhipster.generator.generators.docker.DockerGenerator;
+import io.github.jhipster.generator.generators.server.security.SecurityGenerator;
+import io.github.jhipster.generator.generators.server.error.ErrorHandlingGenerator;
+import io.github.jhipster.generator.generators.server.audit.AuditGenerator;
+import io.github.jhipster.generator.generators.server.logging.LoggingAspectGenerator;
+import io.github.jhipster.generator.generators.server.test.TestInfrastructureGenerator;
+import io.github.jhipster.generator.generators.server.cache.CacheGenerator;
+import io.github.jhipster.generator.generators.liquibase.LiquibaseGenerator;
+import io.github.jhipster.generator.generators.server.user.UserManagementGenerator;
+import io.github.jhipster.generator.generators.cicd.CiCdGenerator;
 import io.github.jhipster.generator.template.JavaCodeBuilder;
 
 import java.util.*;
@@ -58,25 +67,48 @@ public class SpringBootGenerator extends BaseApplicationGenerator {
 
         JHipsterConfig config = getConfig();
 
+        // Security generator (JWT/OAuth2)
+        composeWith(new SecurityGenerator(context));
+
+        // Error handling generator
+        composeWith(new ErrorHandlingGenerator(context));
+
+        // Audit generator
+        composeWith(new AuditGenerator(context));
+
+        // Logging aspect generator
+        composeWith(new LoggingAspectGenerator(context));
+
+        // Cache generator
+        composeWith(new CacheGenerator(context));
+
         // Docker generator
         composeWith(new DockerGenerator(context));
 
         // Database generator based on type
         if (isSql()) {
             composeWith(new SpringDataRelationalGenerator(context));
+
+            // Liquibase generator for SQL databases
+            composeWith(new LiquibaseGenerator(context));
         }
         // Add other database generators: MongoDB, Cassandra, etc.
+
+        // User management generator
+        if (!config.isSkipUserManagement()) {
+            composeWith(new UserManagementGenerator(context));
+        }
 
         // Feign client for microservices (non-reactive)
         if (isMicroservice() && !isReactive() && Boolean.TRUE.equals(config.getFeignClient())) {
             composeWith(new FeignClientGenerator(context));
         }
 
-        // Add other generators based on configuration:
-        // - Spring Cloud Stream (message broker)
-        // - Spring Data Elasticsearch (search engine)
-        // - Spring Cache (cache provider)
-        // - Spring WebSocket
+        // Test infrastructure generator
+        composeWith(new TestInfrastructureGenerator(context));
+
+        // CI/CD generator
+        composeWith(new CiCdGenerator(context));
     }
 
     private void preparing() {
