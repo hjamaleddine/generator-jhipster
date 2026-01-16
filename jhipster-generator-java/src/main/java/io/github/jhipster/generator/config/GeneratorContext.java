@@ -186,7 +186,14 @@ public class GeneratorContext {
     }
 
     public void setConfigValue(String key, Object value) {
-        sharedData.put(key, value);
+        if (key == null) {
+            return;
+        }
+        if (value == null) {
+            sharedData.remove(key);
+        } else {
+            sharedData.put(key, value);
+        }
     }
 
     public boolean hasConfigValue(String key) {
