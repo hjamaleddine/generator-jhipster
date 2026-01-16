@@ -636,7 +636,7 @@ public class SpringBootGenerator extends BaseApplicationGenerator {
         // Service Discovery config import
         if (config.isConsul()) {
             yml.append("  config:\n");
-            yml.append("    import: optional:consul:\n");
+            yml.append("    import: 'optional:consul:'\n");
             yml.append("  cloud:\n");
             yml.append("    consul:\n");
             yml.append("      host: localhost\n");
