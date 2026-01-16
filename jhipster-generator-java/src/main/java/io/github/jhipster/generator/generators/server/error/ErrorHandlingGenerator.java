@@ -44,6 +44,9 @@ public class ErrorHandlingGenerator extends BaseApplicationGenerator {
         writeBadRequestAlertException();
         writeFieldErrorVM();
         writeExceptionTranslator();
+        writeInvalidPasswordException();
+        writeEmailAlreadyUsedException();
+        writeUsernameAlreadyUsedException();
     }
 
     private void writeErrorConstants() throws Exception {
@@ -58,12 +61,12 @@ public class ErrorHandlingGenerator extends BaseApplicationGenerator {
 
         builder.classDeclaration("public final", "ErrorConstants", null);
 
-        builder.staticFinalField("String", "ERR_CONCURRENCY_FAILURE", "\"error.concurrencyFailure\"");
-        builder.staticFinalField("String", "ERR_VALIDATION", "\"error.validation\"");
-        builder.staticFinalField("String", "PROBLEM_BASE_URL", "\"https://www.jhipster.tech/problem\"");
-        builder.staticFinalField("URI", "DEFAULT_TYPE", "URI.create(PROBLEM_BASE_URL + \"/problem-with-message\")");
-        builder.staticFinalField("URI", "CONSTRAINT_VIOLATION_TYPE", "URI.create(PROBLEM_BASE_URL + \"/constraint-violation\")");
-        builder.staticFinalField("URI", "ENTITY_NOT_FOUND_TYPE", "URI.create(PROBLEM_BASE_URL + \"/entity-not-found\")");
+        builder.publicStaticFinalField("String", "ERR_CONCURRENCY_FAILURE", "\"error.concurrencyFailure\"");
+        builder.publicStaticFinalField("String", "ERR_VALIDATION", "\"error.validation\"");
+        builder.publicStaticFinalField("String", "PROBLEM_BASE_URL", "\"https://www.jhipster.tech/problem\"");
+        builder.publicStaticFinalField("URI", "DEFAULT_TYPE", "URI.create(PROBLEM_BASE_URL + \"/problem-with-message\")");
+        builder.publicStaticFinalField("URI", "CONSTRAINT_VIOLATION_TYPE", "URI.create(PROBLEM_BASE_URL + \"/constraint-violation\")");
+        builder.publicStaticFinalField("URI", "ENTITY_NOT_FOUND_TYPE", "URI.create(PROBLEM_BASE_URL + \"/entity-not-found\")");
         builder.line();
 
         builder.constructor("private", "ErrorConstants");
@@ -312,5 +315,80 @@ public class ErrorHandlingGenerator extends BaseApplicationGenerator {
         builder.closeClass();
 
         writeFile(getMainJavaPath() + "web/rest/errors/ExceptionTranslator.java", builder.build());
+    }
+
+    private void writeInvalidPasswordException() throws Exception {
+        JHipsterConfig config = getConfig();
+
+        JavaCodeBuilder builder = new JavaCodeBuilder();
+        builder.packageDeclaration(config.getPackageName() + ".service");
+
+        builder.addImport("java.io.Serial");
+
+        builder.javadoc("Exception thrown when an invalid password is used.");
+
+        builder.classDeclaration("public", "InvalidPasswordException", "RuntimeException");
+
+        builder.annotation("Serial");
+        builder.staticFinalField("long", "serialVersionUID", "1L");
+        builder.line();
+
+        builder.constructor("public", "InvalidPasswordException");
+        builder.statement("super(\"Incorrect password\")");
+        builder.closeMethod();
+
+        builder.closeClass();
+
+        writeFile(getMainJavaPath() + "service/InvalidPasswordException.java", builder.build());
+    }
+
+    private void writeEmailAlreadyUsedException() throws Exception {
+        JHipsterConfig config = getConfig();
+
+        JavaCodeBuilder builder = new JavaCodeBuilder();
+        builder.packageDeclaration(config.getPackageName() + ".service");
+
+        builder.addImport("java.io.Serial");
+
+        builder.javadoc("Exception thrown when an email is already used.");
+
+        builder.classDeclaration("public", "EmailAlreadyUsedException", "RuntimeException");
+
+        builder.annotation("Serial");
+        builder.staticFinalField("long", "serialVersionUID", "1L");
+        builder.line();
+
+        builder.constructor("public", "EmailAlreadyUsedException");
+        builder.statement("super(\"Email is already in use!\")");
+        builder.closeMethod();
+
+        builder.closeClass();
+
+        writeFile(getMainJavaPath() + "service/EmailAlreadyUsedException.java", builder.build());
+    }
+
+    private void writeUsernameAlreadyUsedException() throws Exception {
+        JHipsterConfig config = getConfig();
+
+        JavaCodeBuilder builder = new JavaCodeBuilder();
+        builder.packageDeclaration(config.getPackageName() + ".service");
+
+        builder.addImport("java.io.Serial");
+
+        builder.javadoc("Exception thrown when a login is already used.");
+
+        builder.classDeclaration("public", "UsernameAlreadyUsedException", "RuntimeException");
+
+        builder.annotation("Serial");
+        builder.staticFinalField("long", "serialVersionUID", "1L");
+        builder.line();
+
+        builder.constructor("public", "UsernameAlreadyUsedException");
+        builder.statement("super(\"Login name already used!\")");
+        builder.closeMethod();
+
+        builder.closeClass();
+
+        writeFile(getMainJavaPath() + "service/UsernameAlreadyUsedException.java", builder.build());
     }
 }

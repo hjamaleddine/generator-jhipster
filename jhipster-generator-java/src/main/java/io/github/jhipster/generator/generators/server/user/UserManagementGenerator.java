@@ -1079,8 +1079,7 @@ public class UserManagementGenerator extends BaseApplicationGenerator {
         builder.javadoc("Creates a new user.");
         builder.annotation("PostMapping", "\"/users\"");
         builder.annotation("PreAuthorize", "\"hasAuthority('\" + AuthoritiesConstants.ADMIN + \"')\"");
-        builder.methodSignature("public", "ResponseEntity<User>", "createUser", "@Valid @RequestBody AdminUserDTO userDTO");
-        builder.statement("throws URISyntaxException");
+        builder.methodSignatureWithThrows("public", "ResponseEntity<User>", "createUser", "URISyntaxException", "@Valid @RequestBody AdminUserDTO userDTO");
         builder.statement("log.debug(\"REST request to save User : {}\", userDTO)");
         builder.ifStatement("userDTO.getId() != null");
         builder.statement("throw new BadRequestAlertException(\"A new user cannot already have an ID\", \"userManagement\", \"idexists\")");
@@ -1451,7 +1450,7 @@ public class UserManagementGenerator extends BaseApplicationGenerator {
 
         builder.annotation("Override");
         builder.methodSignature("public", "String", "toString");
-        builder.returnStatement("\"LoginVM{username='\" + username + '\\'' + \", rememberMe=\" + rememberMe + '}\"");
+        builder.returnStatement("\"LoginVM{username='\" + username + '\\'' + \", rememberMe=\" + rememberMe + \"}\"");
         builder.closeMethod();
 
         builder.closeClass();

@@ -120,8 +120,7 @@ public class TestInfrastructureGenerator extends BaseApplicationGenerator {
 
         // convertObjectToJsonBytes
         builder.javadoc("Convert an object to JSON byte array.");
-        builder.methodSignature("public static", "byte[]", "convertObjectToJsonBytes", "Object object");
-        builder.statement("throws IOException");
+        builder.methodSignatureWithThrows("public static", "byte[]", "convertObjectToJsonBytes", "IOException", "Object object");
         builder.returnStatement("mapper.writeValueAsBytes(object)");
         builder.closeMethod();
         builder.line();
@@ -150,8 +149,7 @@ public class TestInfrastructureGenerator extends BaseApplicationGenerator {
 
         // sameInstant matcher
         builder.javadoc("Verifies the equals/hashCode contract on the domain object.");
-        builder.methodSignature("public static", "<T> void", "equalsVerifier", "Class<T> clazz");
-        builder.statement("throws Exception");
+        builder.methodSignatureWithThrows("public static", "<T> void", "equalsVerifier", "Exception", "Class<T> clazz");
         builder.statement("T domainObject1 = clazz.getDeclaredConstructor().newInstance()");
         builder.statement("assertThat(domainObject1.toString()).isNotNull()");
         builder.statement("assertThat(domainObject1).isEqualTo(domainObject1)");

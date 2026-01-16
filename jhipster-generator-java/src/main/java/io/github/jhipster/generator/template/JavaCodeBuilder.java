@@ -169,12 +169,20 @@ public class JavaCodeBuilder {
     // ==================== Methods ====================
 
     public JavaCodeBuilder methodSignature(String modifiers, String returnType, String name, String... parameters) {
+        return methodSignatureWithThrows(modifiers, returnType, name, null, parameters);
+    }
+
+    public JavaCodeBuilder methodSignatureWithThrows(String modifiers, String returnType, String name, String throwsClause, String... parameters) {
         StringBuilder sig = new StringBuilder();
         sig.append(modifiers);
         if (!modifiers.isEmpty()) sig.append(" ");
         sig.append(returnType).append(" ").append(name).append("(");
         sig.append(String.join(", ", parameters));
-        sig.append(") {");
+        sig.append(")");
+        if (throwsClause != null && !throwsClause.isEmpty()) {
+            sig.append(" throws ").append(throwsClause);
+        }
+        sig.append(" {");
         line(sig.toString());
         indent();
         return this;

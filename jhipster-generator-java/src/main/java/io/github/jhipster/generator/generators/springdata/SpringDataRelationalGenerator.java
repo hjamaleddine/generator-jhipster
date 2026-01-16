@@ -730,15 +730,15 @@ public class SpringDataRelationalGenerator extends BaseApplicationGenerator {
             builder.addImport(packageName + ".domain." + entityClass);
         }
 
+        builder.addImport("java.util.List");
         if (entity.hasPagination()) {
             builder.addImports(
                 "org.springframework.data.domain.Page",
                 "org.springframework.data.domain.Pageable",
                 "org.springframework.http.HttpHeaders",
+                "org.springframework.web.servlet.support.ServletUriComponentsBuilder",
                 "tech.jhipster.web.util.PaginationUtil"
             );
-        } else {
-            builder.addImport("java.util.List");
         }
 
         String endpointPrefix = getConfig().isMicroservice() ? "/api" : "/api";
@@ -802,7 +802,7 @@ public class SpringDataRelationalGenerator extends BaseApplicationGenerator {
                 "Pageable pageable");
             builder.statement("log.debug(\"REST request to get a page of " + entityClass + "s\")");
             builder.statement("Page<" + dtoClass + "> page = " + entityInstance + "Service.findAll(pageable)");
-            builder.statement("HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, \"/api/" + entityInstance + "s\")");
+            builder.statement("HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page)");
             builder.returnStatement("ResponseEntity.ok().headers(headers).body(page.getContent())");
         } else {
             builder.methodSignature("public", "List<" + dtoClass + ">", "getAll" + entityClass + "s");

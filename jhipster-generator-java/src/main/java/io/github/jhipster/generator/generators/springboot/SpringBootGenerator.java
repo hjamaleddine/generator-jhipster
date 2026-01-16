@@ -512,6 +512,11 @@ public class SpringBootGenerator extends BaseApplicationGenerator {
         pom.append("                            <artifactId>mapstruct-processor</artifactId>\n");
         pom.append("                            <version>${mapstruct.version}</version>\n");
         pom.append("                        </path>\n");
+        pom.append("                        <path>\n");
+        pom.append("                            <groupId>org.hibernate.orm</groupId>\n");
+        pom.append("                            <artifactId>hibernate-jpamodelgen</artifactId>\n");
+        pom.append("                            <version>6.4.1.Final</version>\n");
+        pom.append("                        </path>\n");
         pom.append("                    </annotationProcessorPaths>\n");
         pom.append("                </configuration>\n");
         pom.append("            </plugin>\n");
