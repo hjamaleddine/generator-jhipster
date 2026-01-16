@@ -156,28 +156,42 @@ public abstract class BaseGenerator {
     }
 
     private final Set<String> mergedGeneratorNames = new HashSet<>();
+    private final Set<BaseGenerator> allKnownGenerators = new HashSet<>();
 
     /**
      * Merges tasks from all unmerged child generators, recursively.
+     * Also checks for new children of already-merged generators.
      */
     private void mergeAllChildTasks() {
-        mergeChildTasksRecursively(childGenerators);
-    }
+        // Collect all generators in the hierarchy
+        collectAllGenerators(childGenerators);
 
-    /**
-     * Recursively merges tasks from child generators and their children.
-     */
-    private void mergeChildTasksRecursively(List<BaseGenerator> generators) {
-        for (BaseGenerator child : generators) {
-            if (mergedGeneratorNames.add(child.getName())) {
-                log.debug("Merging tasks from: {}", child.getName());
-                for (Map.Entry<GeneratorPriority, List<GeneratorTask>> entry : child.tasks.entrySet()) {
+        // Merge tasks from any new generators
+        for (BaseGenerator gen : allKnownGenerators) {
+            if (mergedGeneratorNames.add(gen.getName())) {
+                log.debug("Merging tasks from: {}", gen.getName());
+                for (Map.Entry<GeneratorPriority, List<GeneratorTask>> entry : gen.tasks.entrySet()) {
                     tasks.computeIfAbsent(entry.getKey(), k -> new ArrayList<>())
                         .addAll(entry.getValue());
                 }
-                // Recursively merge grandchildren
+            }
+        }
+    }
+
+    /**
+     * Recursively collects all generators in the hierarchy.
+     */
+    private void collectAllGenerators(List<BaseGenerator> generators) {
+        for (BaseGenerator child : generators) {
+            if (allKnownGenerators.add(child)) {
+                // New generator found, also check its children
                 if (!child.childGenerators.isEmpty()) {
-                    mergeChildTasksRecursively(child.childGenerators);
+                    collectAllGenerators(child.childGenerators);
+                }
+            } else {
+                // Already known generator, but check if it has new children
+                if (!child.childGenerators.isEmpty()) {
+                    collectAllGenerators(child.childGenerators);
                 }
             }
         }
