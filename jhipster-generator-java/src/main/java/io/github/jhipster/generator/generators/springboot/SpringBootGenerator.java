@@ -35,6 +35,11 @@ import io.github.jhipster.generator.generators.elasticsearch.SpringDataElasticse
 import io.github.jhipster.generator.generators.websocket.SpringWebSocketGenerator;
 import io.github.jhipster.generator.generators.jib.JibGenerator;
 import io.github.jhipster.generator.generators.codequality.CodeQualityGenerator;
+import io.github.jhipster.generator.generators.mongodb.SpringDataMongoDBGenerator;
+import io.github.jhipster.generator.generators.cassandra.SpringDataCassandraGenerator;
+import io.github.jhipster.generator.generators.couchbase.SpringDataCouchbaseGenerator;
+import io.github.jhipster.generator.generators.neo4j.SpringDataNeo4jGenerator;
+import io.github.jhipster.generator.generators.kubernetes.KubernetesGenerator;
 import io.github.jhipster.generator.template.JavaCodeBuilder;
 
 import java.util.*;
@@ -115,7 +120,18 @@ public class SpringBootGenerator extends BaseApplicationGenerator {
 
             // Liquibase generator for SQL databases
             composeWith(new LiquibaseGenerator(context));
+        } else if ("mongodb".equals(config.getDatabaseType())) {
+            composeWith(new SpringDataMongoDBGenerator(context));
+        } else if ("cassandra".equals(config.getDatabaseType())) {
+            composeWith(new SpringDataCassandraGenerator(context));
+        } else if ("couchbase".equals(config.getDatabaseType())) {
+            composeWith(new SpringDataCouchbaseGenerator(context));
+        } else if ("neo4j".equals(config.getDatabaseType())) {
+            composeWith(new SpringDataNeo4jGenerator(context));
         }
+
+        // Kubernetes generator for deployment manifests
+        composeWith(new KubernetesGenerator(context));
 
         // Elasticsearch search engine
         if ("elasticsearch".equals(config.getSearchEngine())) {

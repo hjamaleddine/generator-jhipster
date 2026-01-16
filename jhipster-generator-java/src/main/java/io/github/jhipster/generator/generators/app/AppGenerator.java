@@ -16,6 +16,7 @@ import io.github.jhipster.generator.generators.bootstrap.BootstrapApplicationBas
 import io.github.jhipster.generator.generators.server.ServerGenerator;
 import io.github.jhipster.generator.generators.common.CommonGenerator;
 import io.github.jhipster.generator.generators.maven.MavenGenerator;
+import io.github.jhipster.generator.generators.gradle.GradleGenerator;
 
 /**
  * Main Application Generator.
@@ -73,8 +74,13 @@ public class AppGenerator extends BaseApplicationGenerator {
         // Common generator (git, prettier, editorconfig, etc.)
         composeWith(new CommonGenerator(context));
 
-        // Maven generator (wrapper, pom.xml structure)
-        composeWith(new MavenGenerator(context));
+        // Build tool generator (Maven or Gradle)
+        if ("gradle".equals(getConfig().getBuildTool())) {
+            composeWith(new GradleGenerator(context));
+        } else {
+            // Default to Maven
+            composeWith(new MavenGenerator(context));
+        }
 
         // Always compose with server generator for microservices
         if (!Boolean.TRUE.equals(getConfig().getSkipClient()) || isMicroservice()) {
@@ -102,7 +108,11 @@ public class AppGenerator extends BaseApplicationGenerator {
         log.info("==========================================================");
         log.info("");
         log.info("To start the application:");
-        log.info("  ./mvnw spring-boot:run");
+        if ("gradle".equals(getConfig().getBuildTool())) {
+            log.info("  ./gradlew bootRun");
+        } else {
+            log.info("  ./mvnw spring-boot:run");
+        }
         log.info("");
     }
 
