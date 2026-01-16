@@ -705,6 +705,8 @@ public class SpringBootGenerator extends BaseApplicationGenerator {
         yml.append("# ===================================================================\n\n");
 
         yml.append("jhipster:\n");
+        yml.append("  clientApp:\n");
+        yml.append("    name: '").append(config.getBaseName()).append("'\n");
         if (config.isJwt()) {
             yml.append("  security:\n");
             yml.append("    authentication:\n");
