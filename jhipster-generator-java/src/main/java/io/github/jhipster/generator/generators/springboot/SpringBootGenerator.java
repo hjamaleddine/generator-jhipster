@@ -743,7 +743,8 @@ public class SpringBootGenerator extends BaseApplicationGenerator {
         yml.append("  level:\n");
         yml.append("    ROOT: DEBUG\n");
         yml.append("    ").append(config.getPackageName()).append(": DEBUG\n");
-        yml.append("    javax.management.mbeanserver: INFO\n");
+        yml.append("    javax.management: WARN\n");
+        yml.append("    sun.rmi: WARN\n");
 
         if (isSql()) {
             yml.append("\nspring:\n");
