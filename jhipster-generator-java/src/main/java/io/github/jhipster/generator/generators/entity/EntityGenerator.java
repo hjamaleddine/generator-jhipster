@@ -37,9 +37,22 @@ public class EntityGenerator extends BaseApplicationGenerator {
 
     private final EntityConfig entity;
 
+    /**
+     * Constructor for generating a single entity.
+     */
     public EntityGenerator(GeneratorContext context, EntityConfig entity) {
         super(context);
         this.entity = entity;
+    }
+
+    /**
+     * Constructor for generating all entities from context.
+     * Uses the first entity or null if no entities exist.
+     */
+    public EntityGenerator(GeneratorContext context) {
+        super(context);
+        List<EntityConfig> entities = context.getEntities();
+        this.entity = (entities != null && !entities.isEmpty()) ? entities.get(0) : null;
     }
 
     @Override
@@ -57,47 +70,51 @@ public class EntityGenerator extends BaseApplicationGenerator {
     }
 
     private void configuring() {
-        log.info("Configuring entity: {}", entity.getName());
+        if (entity != null) {
+            log.info("Configuring entity: {}", entity.getName());
 
-        // Add entity to context if not already present
-        List<EntityConfig> entities = context.getEntities();
-        if (entities == null) {
-            entities = new ArrayList<>();
-        }
+            // Add entity to context if not already present
+            List<EntityConfig> entities = context.getEntities();
+            if (entities == null) {
+                entities = new ArrayList<>();
+            }
 
-        boolean exists = entities.stream()
-            .anyMatch(e -> e.getName().equals(entity.getName()));
+            boolean exists = entities.stream()
+                .anyMatch(e -> e.getName().equals(entity.getName()));
 
-        if (!exists) {
-            entities.add(entity);
-            context.setEntities(entities);
+            if (!exists) {
+                entities.add(entity);
+                context.setEntities(entities);
+            }
         }
     }
 
     private void composing() {
-        log.info("Composing entity sub-generators for: {}", entity.getName());
-
+        if (entity != null) {
+            log.info("Composing entity sub-generators for: {}", entity.getName());
+        }
         // The entity-specific generation is handled by the sub-generators
         // which are already composed by SpringBootGenerator
     }
 
     private void writing() throws Exception {
-        log.info("Writing entity: {}", entity.getName());
-
-        // Save entity configuration to .jhipster directory
-        saveEntityConfig();
+        // Write all entities from context
+        for (EntityConfig e : context.getEntities()) {
+            log.info("Writing entity: {}", e.getName());
+            saveEntityConfig(e);
+        }
     }
 
-    private void saveEntityConfig() throws Exception {
+    private void saveEntityConfig(EntityConfig entityToSave) throws Exception {
         // Serialize entity configuration to JSON
         StringBuilder json = new StringBuilder();
         json.append("{\n");
-        json.append("  \"name\": \"").append(entity.getName()).append("\",\n");
-        json.append("  \"entityTableName\": \"").append(entity.getEntityTableName()).append("\",\n");
+        json.append("  \"name\": \"").append(entityToSave.getName()).append("\",\n");
+        json.append("  \"entityTableName\": \"").append(entityToSave.getEntityTableName()).append("\",\n");
 
         // Fields
         json.append("  \"fields\": [\n");
-        List<FieldConfig> fields = entity.getFields();
+        List<FieldConfig> fields = entityToSave.getFields();
         for (int i = 0; i < fields.size(); i++) {
             FieldConfig field = fields.get(i);
             json.append("    {\n");
@@ -127,7 +144,7 @@ public class EntityGenerator extends BaseApplicationGenerator {
 
         // Relationships
         json.append("  \"relationships\": [\n");
-        List<RelationshipConfig> relationships = entity.getRelationships();
+        List<RelationshipConfig> relationships = entityToSave.getRelationships();
         for (int i = 0; i < relationships.size(); i++) {
             RelationshipConfig rel = relationships.get(i);
             json.append("    {\n");
@@ -149,15 +166,15 @@ public class EntityGenerator extends BaseApplicationGenerator {
         json.append("  ],\n");
 
         // Other properties
-        json.append("  \"dto\": \"").append(entity.isDto() ? "mapstruct" : "no").append("\",\n");
-        json.append("  \"service\": \"").append(entity.isServiceClass() ? "serviceClass" : "no").append("\",\n");
-        json.append("  \"pagination\": \"").append(entity.getPagination() != null ? entity.getPagination() : "no").append("\",\n");
-        json.append("  \"jpaMetamodelFiltering\": ").append(entity.isFiltering()).append(",\n");
-        json.append("  \"readOnly\": ").append(entity.isReadOnly()).append("\n");
+        json.append("  \"dto\": \"").append(entityToSave.isDto() ? "mapstruct" : "no").append("\",\n");
+        json.append("  \"service\": \"").append(entityToSave.isServiceClass() ? "serviceClass" : "no").append("\",\n");
+        json.append("  \"pagination\": \"").append(entityToSave.getPagination() != null ? entityToSave.getPagination() : "no").append("\",\n");
+        json.append("  \"jpaMetamodelFiltering\": ").append(entityToSave.isFiltering()).append(",\n");
+        json.append("  \"readOnly\": ").append(entityToSave.isReadOnly()).append("\n");
         json.append("}\n");
 
         String jhipsterDir = context.getBasePath().toString() + "/.jhipster/";
-        writeFile(jhipsterDir + entity.getName() + ".json", json.toString());
+        writeFile(jhipsterDir + entityToSave.getName() + ".json", json.toString());
     }
 
     /**
