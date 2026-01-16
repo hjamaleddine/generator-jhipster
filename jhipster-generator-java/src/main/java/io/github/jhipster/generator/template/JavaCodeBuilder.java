@@ -139,6 +139,15 @@ public class JavaCodeBuilder {
 
     // ==================== Fields ====================
 
+    /**
+     * Field declaration with combined modifiers and type.
+     * Example: field("private String", "name")
+     */
+    public JavaCodeBuilder field(String modifiersAndType, String name) {
+        line(modifiersAndType + " " + name + ";");
+        return this;
+    }
+
     public JavaCodeBuilder field(String modifiers, String type, String name) {
         line(modifiers + " " + type + " " + name + ";");
         return this;
@@ -253,6 +262,23 @@ public class JavaCodeBuilder {
         outdent();
         line("}");
         return this;
+    }
+
+    /**
+     * Simplified for statement that takes a complete for clause.
+     * Example: forStatement("int i = 0; i < 10; i++") or forStatement("Map.Entry entry : map.entrySet()")
+     */
+    public JavaCodeBuilder forStatement(String forClause) {
+        line("for (" + forClause + ") {");
+        indent();
+        return this;
+    }
+
+    /**
+     * Closes a for block (alias for closeLoop).
+     */
+    public JavaCodeBuilder closeFor() {
+        return closeLoop();
     }
 
     public JavaCodeBuilder tryBlock() {

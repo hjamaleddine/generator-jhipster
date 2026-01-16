@@ -235,8 +235,4 @@ public class SpringCloudStreamGenerator extends BaseApplicationGenerator {
 
         writeFile(getMainResourcesPath() + "config/kafka.yml", yml.toString());
     }
-
-    private String getMainResourcesPath() {
-        return context.getBasePath().toString() + "/src/main/resources/";
-    }
 }

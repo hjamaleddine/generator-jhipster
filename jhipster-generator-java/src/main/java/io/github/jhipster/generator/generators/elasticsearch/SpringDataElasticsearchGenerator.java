@@ -153,8 +153,4 @@ public class SpringDataElasticsearchGenerator extends BaseApplicationGenerator {
 
         writeFile(getMainResourcesPath() + "config/elasticsearch.yml", yml.toString());
     }
-
-    private String getMainResourcesPath() {
-        return context.getBasePath().toString() + "/src/main/resources/";
-    }
 }

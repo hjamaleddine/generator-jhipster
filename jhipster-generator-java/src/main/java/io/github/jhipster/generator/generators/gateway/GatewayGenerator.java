@@ -244,8 +244,4 @@ public class GatewayGenerator extends BaseApplicationGenerator {
 
         writeFile(getMainResourcesPath() + "config/gateway.yml", yml.toString());
     }
-
-    private String getMainResourcesPath() {
-        return context.getBasePath().toString() + "/src/main/resources/";
-    }
 }

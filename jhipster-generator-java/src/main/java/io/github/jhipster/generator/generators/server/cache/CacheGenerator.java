@@ -282,8 +282,4 @@ public class CacheGenerator extends BaseApplicationGenerator {
         builder.returnStatement("template");
         builder.closeMethod();
     }
-
-    private String getMainResourcesPath() {
-        return context.getBasePath().toString() + "/src/main/resources/";
-    }
 }

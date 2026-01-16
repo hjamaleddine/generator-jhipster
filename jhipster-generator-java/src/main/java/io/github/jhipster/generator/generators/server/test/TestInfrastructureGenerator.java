@@ -389,12 +389,4 @@ public class TestInfrastructureGenerator extends BaseApplicationGenerator {
 
         writeFile(getTestResourcesPath() + "config/application.yml", yml.toString());
     }
-
-    private String getTestJavaPath() {
-        return context.getTestJavaPath();
-    }
-
-    private String getTestResourcesPath() {
-        return context.getBasePath().toString() + "/src/test/resources/";
-    }
 }
