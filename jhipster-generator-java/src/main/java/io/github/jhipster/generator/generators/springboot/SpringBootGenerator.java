@@ -477,13 +477,23 @@ public class SpringBootGenerator extends BaseApplicationGenerator {
         pom.append("            <artifactId>spring-security-test</artifactId>\n");
         pom.append("            <scope>test</scope>\n");
         pom.append("        </dependency>\n");
+        pom.append("        <dependency>\n");
+        pom.append("            <groupId>org.testcontainers</groupId>\n");
+        pom.append("            <artifactId>testcontainers</artifactId>\n");
+        pom.append("            <scope>test</scope>\n");
+        pom.append("        </dependency>\n");
+        pom.append("        <dependency>\n");
+        pom.append("            <groupId>org.testcontainers</groupId>\n");
+        pom.append("            <artifactId>junit-jupiter</artifactId>\n");
+        pom.append("            <scope>test</scope>\n");
+        pom.append("        </dependency>\n");
 
         pom.append("    </dependencies>\n\n");
 
-        // Dependency Management for Spring Cloud
+        // Dependency Management
+        pom.append("    <dependencyManagement>\n");
+        pom.append("        <dependencies>\n");
         if (config.hasServiceDiscovery() || Boolean.TRUE.equals(config.getFeignClient())) {
-            pom.append("    <dependencyManagement>\n");
-            pom.append("        <dependencies>\n");
             pom.append("            <dependency>\n");
             pom.append("                <groupId>org.springframework.cloud</groupId>\n");
             pom.append("                <artifactId>spring-cloud-dependencies</artifactId>\n");
@@ -491,9 +501,16 @@ public class SpringBootGenerator extends BaseApplicationGenerator {
             pom.append("                <type>pom</type>\n");
             pom.append("                <scope>import</scope>\n");
             pom.append("            </dependency>\n");
-            pom.append("        </dependencies>\n");
-            pom.append("    </dependencyManagement>\n\n");
         }
+        pom.append("            <dependency>\n");
+        pom.append("                <groupId>org.testcontainers</groupId>\n");
+        pom.append("                <artifactId>testcontainers-bom</artifactId>\n");
+        pom.append("                <version>1.19.3</version>\n");
+        pom.append("                <type>pom</type>\n");
+        pom.append("                <scope>import</scope>\n");
+        pom.append("            </dependency>\n");
+        pom.append("        </dependencies>\n");
+        pom.append("    </dependencyManagement>\n\n");
 
         // Build
         pom.append("    <build>\n");

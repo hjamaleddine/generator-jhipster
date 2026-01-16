@@ -54,7 +54,10 @@ public class TestInfrastructureGenerator extends BaseApplicationGenerator {
         builder.packageDeclaration(config.getPackageName());
 
         builder.addImports(
-            "java.lang.annotation.*",
+            "java.lang.annotation.ElementType",
+            "java.lang.annotation.Retention",
+            "java.lang.annotation.RetentionPolicy",
+            "java.lang.annotation.Target",
             "org.springframework.boot.test.context.SpringBootTest",
             "org.springframework.test.annotation.DirtiesContext"
         );
