@@ -641,11 +641,17 @@ public class SpringBootGenerator extends BaseApplicationGenerator {
             yml.append("    consul:\n");
             yml.append("      host: localhost\n");
             yml.append("      port: 8500\n");
+            yml.append("      enabled: false\n");
             yml.append("      discovery:\n");
+            yml.append("        enabled: false\n");
+            yml.append("        fail-fast: false\n");
+            yml.append("        register: false\n");
             yml.append("        healthCheckPath: /management/health\n");
             yml.append("        instanceId: ").append(config.getLowerBaseName()).append(":${spring.application.instance-id:${random.value}}\n");
             yml.append("        service-name: ").append(config.getLowerBaseName()).append("\n");
             yml.append("      config:\n");
+            yml.append("        enabled: false\n");
+            yml.append("        fail-fast: false\n");
             yml.append("        watch:\n");
             yml.append("          enabled: false\n");
         }
