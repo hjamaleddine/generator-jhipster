@@ -88,7 +88,11 @@ public class FeignClientGenerator extends BaseApplicationGenerator {
         builder.addImports(
             "org.springframework.cloud.openfeign.FeignClient",
             "org.springframework.core.annotation.AliasFor",
-            "java.lang.annotation.*"
+            "java.lang.annotation.Documented",
+            "java.lang.annotation.ElementType",
+            "java.lang.annotation.Retention",
+            "java.lang.annotation.RetentionPolicy",
+            "java.lang.annotation.Target"
         );
 
         builder.javadoc("Annotation to mark Feign clients that should include authorization headers.");
