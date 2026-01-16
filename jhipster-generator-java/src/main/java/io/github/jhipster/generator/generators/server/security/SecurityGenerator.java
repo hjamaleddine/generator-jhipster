@@ -568,7 +568,7 @@ public class SecurityGenerator extends BaseApplicationGenerator {
 
         // SecurityFilterChain
         builder.annotation("Bean");
-        builder.methodSignature("public", "SecurityFilterChain", "filterChain", "HttpSecurity http");
+        builder.methodSignatureWithThrows("public", "SecurityFilterChain", "filterChain", "Exception", "HttpSecurity http");
         builder.line("http");
         builder.indent();
         builder.line(".csrf(csrf -> csrf.disable())");
