@@ -615,6 +615,23 @@ public class SpringBootGenerator extends BaseApplicationGenerator {
         yml.append("  profiles:\n");
         yml.append("    active: dev\n");
 
+        // Service Discovery config import
+        if (config.isConsul()) {
+            yml.append("  config:\n");
+            yml.append("    import: optional:consul:\n");
+            yml.append("  cloud:\n");
+            yml.append("    consul:\n");
+            yml.append("      host: localhost\n");
+            yml.append("      port: 8500\n");
+            yml.append("      discovery:\n");
+            yml.append("        healthCheckPath: /management/health\n");
+            yml.append("        instanceId: ").append(config.getLowerBaseName()).append(":${spring.application.instance-id:${random.value}}\n");
+            yml.append("        service-name: ").append(config.getLowerBaseName()).append("\n");
+            yml.append("      config:\n");
+            yml.append("        watch:\n");
+            yml.append("          enabled: false\n");
+        }
+
         if (isSql()) {
             yml.append("  jpa:\n");
             yml.append("    open-in-view: false\n");
@@ -630,18 +647,8 @@ public class SpringBootGenerator extends BaseApplicationGenerator {
         yml.append("\nserver:\n");
         yml.append("  port: ").append(config.getServerPort()).append("\n");
 
-        // Service Discovery
-        if (config.isConsul()) {
-            yml.append("\n  cloud:\n");
-            yml.append("    consul:\n");
-            yml.append("      discovery:\n");
-            yml.append("        healthCheckPath: /management/health\n");
-            yml.append("        instanceId: ").append(config.getLowerBaseName()).append(":${spring.application.instance-id:${random.value}}\n");
-            yml.append("        service-name: ").append(config.getLowerBaseName()).append("\n");
-            yml.append("      config:\n");
-            yml.append("        watch:\n");
-            yml.append("          enabled: false\n");
-        } else if (config.isEureka()) {
+        // Eureka Service Discovery
+        if (config.isEureka()) {
             yml.append("\neureka:\n");
             yml.append("  client:\n");
             yml.append("    enabled: true\n");
