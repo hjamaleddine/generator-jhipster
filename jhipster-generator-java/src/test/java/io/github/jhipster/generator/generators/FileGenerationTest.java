@@ -12,7 +12,9 @@ import io.github.jhipster.generator.model.FieldConfig;
 import org.junit.jupiter.api.*;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -24,12 +26,17 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class FileGenerationTest {
 
+    private static final Path TARGET_DIR = Paths.get("target/generated-test-sources");
     private Path testDir;
 
     @BeforeEach
     void setUp() throws IOException {
-        testDir = Files.createTempDirectory("file-generation-test");
-        System.out.println("Test output directory: " + testDir);
+        // Use target directory so files persist after test
+        testDir = TARGET_DIR.resolve("test-" + System.currentTimeMillis());
+        Files.createDirectories(testDir);
+        System.out.println("===========================================");
+        System.out.println("Test output directory: " + testDir.toAbsolutePath());
+        System.out.println("===========================================");
     }
 
     @AfterEach
@@ -39,18 +46,10 @@ class FileGenerationTest {
             Files.walk(testDir)
                 .filter(Files::isRegularFile)
                 .forEach(path -> System.out.println("  " + testDir.relativize(path)));
-
-            // Clean up
-            Files.walk(testDir)
-                .sorted(Comparator.reverseOrder())
-                .forEach(path -> {
-                    try {
-                        Files.delete(path);
-                    } catch (IOException e) {
-                        // Ignore
-                    }
-                });
         }
+        System.out.println("\nFiles kept at: " + testDir.toAbsolutePath());
+        System.out.println("===========================================\n");
+        // Don't delete - keep files for inspection
     }
 
     @Test
