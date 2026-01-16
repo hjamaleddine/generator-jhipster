@@ -34,10 +34,23 @@ public class JavaCodeBuilder {
     }
 
     public JavaCodeBuilder addImport(String importClass) {
-        if (importClass != null && !importClass.startsWith("java.lang.")) {
+        if (importClass != null && !isJavaLangClass(importClass)) {
             imports.add(importClass);
         }
         return this;
+    }
+
+    /**
+     * Check if the class is in java.lang package (not subpackages like java.lang.annotation).
+     * Classes in java.lang don't need explicit imports.
+     */
+    private boolean isJavaLangClass(String importClass) {
+        if (!importClass.startsWith("java.lang.")) {
+            return false;
+        }
+        // Check if it's a direct java.lang class (not a subpackage)
+        String afterJavaLang = importClass.substring("java.lang.".length());
+        return !afterJavaLang.contains(".");
     }
 
     public JavaCodeBuilder addImports(String... importClasses) {
