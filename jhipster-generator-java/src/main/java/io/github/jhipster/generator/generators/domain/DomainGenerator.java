@@ -579,7 +579,7 @@ public class DomainGenerator extends BaseApplicationGenerator {
         builder.annotation("Override");
         builder.methodSignature("public", "String", "toString");
         StringBuilder toStringBody = new StringBuilder();
-        toStringBody.append("return \"").append(entity.getPersistClass()).append("{\" +\n");
+        toStringBody.append("\"").append(entity.getPersistClass()).append("{\" +\n");
         if (pk != null) {
             toStringBody.append("            \"").append(pk.getName()).append("=\" + get")
                 .append(pk.getNameCapitalized()).append("() +\n");

@@ -65,9 +65,9 @@ public class SecurityGenerator extends BaseApplicationGenerator {
 
         builder.classDeclaration("public final", "AuthoritiesConstants", null);
 
-        builder.staticFinalField("String", "ADMIN", "\"ROLE_ADMIN\"");
-        builder.staticFinalField("String", "USER", "\"ROLE_USER\"");
-        builder.staticFinalField("String", "ANONYMOUS", "\"ROLE_ANONYMOUS\"");
+        builder.publicStaticFinalField("String", "ADMIN", "\"ROLE_ADMIN\"");
+        builder.publicStaticFinalField("String", "USER", "\"ROLE_USER\"");
+        builder.publicStaticFinalField("String", "ANONYMOUS", "\"ROLE_ANONYMOUS\"");
         builder.line();
 
         builder.constructor("private", "AuthoritiesConstants");

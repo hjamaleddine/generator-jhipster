@@ -162,6 +162,10 @@ public class JavaCodeBuilder {
         return field("private static final", type, name, value);
     }
 
+    public JavaCodeBuilder publicStaticFinalField(String type, String name, String value) {
+        return field("public static final", type, name, value);
+    }
+
     // ==================== Methods ====================
 
     public JavaCodeBuilder methodSignature(String modifiers, String returnType, String name, String... parameters) {
@@ -211,7 +215,11 @@ public class JavaCodeBuilder {
     }
 
     public JavaCodeBuilder returnStatement(String expression) {
-        line("return " + expression + ";");
+        if (expression == null || expression.isEmpty()) {
+            line("return;");
+        } else {
+            line("return " + expression + ";");
+        }
         return this;
     }
 

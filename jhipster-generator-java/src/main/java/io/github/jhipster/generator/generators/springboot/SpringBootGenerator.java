@@ -457,6 +457,14 @@ public class SpringBootGenerator extends BaseApplicationGenerator {
         pom.append("            <artifactId>spring-boot-starter-aop</artifactId>\n");
         pom.append("        </dependency>\n");
 
+        // OpenAPI/Swagger
+        pom.append("\n        <!-- OpenAPI/Swagger -->\n");
+        pom.append("        <dependency>\n");
+        pom.append("            <groupId>org.springdoc</groupId>\n");
+        pom.append("            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>\n");
+        pom.append("            <version>2.3.0</version>\n");
+        pom.append("        </dependency>\n");
+
         // Testing
         pom.append("\n        <!-- Testing -->\n");
         pom.append("        <dependency>\n");

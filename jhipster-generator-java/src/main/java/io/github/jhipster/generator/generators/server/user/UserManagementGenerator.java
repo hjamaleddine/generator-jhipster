@@ -133,7 +133,7 @@ public class UserManagementGenerator extends BaseApplicationGenerator {
 
         builder.annotation("NotNull");
         builder.annotation("Column", "nullable = false");
-        builder.field("private boolean", "activated", "false");
+        builder.field("private", "boolean", "activated", "false");
         builder.line();
 
         builder.annotation("Size", "min = 2, max = 10");
@@ -848,7 +848,7 @@ public class UserManagementGenerator extends BaseApplicationGenerator {
         builder.field("private", "String", "imageUrl");
         builder.line();
 
-        builder.field("private boolean", "activated", "false");
+        builder.field("private", "boolean", "activated", "false");
         builder.line();
 
         builder.annotation("Size", "min = 2, max = 10");
