@@ -75,20 +75,13 @@ public class CacheGenerator extends BaseApplicationGenerator {
         builder.packageDeclaration(config.getPackageName() + ".config");
 
         builder.addImports(
-            "org.springframework.boot.autoconfigure.cache.JCacheManagerCustomizer",
             "org.springframework.cache.annotation.EnableCaching",
             "org.springframework.context.annotation.Bean",
-            "org.springframework.context.annotation.Configuration",
-            "tech.jhipster.config.JHipsterProperties"
+            "org.springframework.context.annotation.Configuration"
         );
 
         String cacheProvider = config.getCacheProvider();
-        if ("ehcache".equals(cacheProvider)) {
-            builder.addImports(
-                "org.hibernate.cache.jcache.ConfigSettings",
-                "org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer"
-            );
-        } else if ("hazelcast".equals(cacheProvider)) {
+        if ("hazelcast".equals(cacheProvider)) {
             builder.addImports(
                 "com.hazelcast.config.Config",
                 "com.hazelcast.config.EvictionConfig",
@@ -105,13 +98,6 @@ public class CacheGenerator extends BaseApplicationGenerator {
         builder.annotation("EnableCaching");
 
         builder.classDeclaration("public", "CacheConfiguration", null);
-
-        builder.field("private final", "JHipsterProperties", "jHipsterProperties");
-        builder.line();
-
-        builder.constructor("public", "CacheConfiguration", "JHipsterProperties jHipsterProperties");
-        builder.statement("this.jHipsterProperties = jHipsterProperties");
-        builder.closeMethod();
 
         if ("ehcache".equals(cacheProvider)) {
             writeEhcacheBeans(builder);
@@ -206,22 +192,9 @@ public class CacheGenerator extends BaseApplicationGenerator {
     }
 
     private void writeEhcacheBeans(JavaCodeBuilder builder) throws Exception {
-        JHipsterConfig config = getConfig();
-
+        // Ehcache is configured via ehcache.xml, no additional beans needed
         builder.line();
-        builder.annotation("Bean");
-        builder.methodSignature("public", "HibernatePropertiesCustomizer", "hibernatePropertiesCustomizer",
-            "javax.cache.CacheManager cacheManager");
-        builder.returnStatement("hibernateProperties -> hibernateProperties.put(ConfigSettings.CACHE_MANAGER, cacheManager)");
-        builder.closeMethod();
-        builder.line();
-
-        builder.annotation("Bean");
-        builder.methodSignature("public", "JCacheManagerCustomizer", "cacheManagerCustomizer");
-        builder.returnStatement("cm -> {\n" +
-            "            // Configure caches here\n" +
-            "        }");
-        builder.closeMethod();
+        builder.lineComment("Ehcache configuration is loaded from src/main/resources/config/ehcache/ehcache.xml");
     }
 
     private void writeCaffeineBeans(JavaCodeBuilder builder) throws Exception {
@@ -237,8 +210,8 @@ public class CacheGenerator extends BaseApplicationGenerator {
         builder.methodSignature("public", "CacheManager", "cacheManager");
         builder.statement("CaffeineCacheManager cacheManager = new CaffeineCacheManager()");
         builder.statement("cacheManager.setCaffeine(Caffeine.newBuilder()\n" +
-            "            .expireAfterWrite(jHipsterProperties.getCache().getCaffeine().getTimeToLiveSeconds(), TimeUnit.SECONDS)\n" +
-            "            .maximumSize(jHipsterProperties.getCache().getCaffeine().getMaxEntries()))");
+            "            .expireAfterWrite(3600, TimeUnit.SECONDS)\n" +
+            "            .maximumSize(100))");
         builder.returnStatement("cacheManager");
         builder.closeMethod();
     }
@@ -246,7 +219,7 @@ public class CacheGenerator extends BaseApplicationGenerator {
     private void writeHazelcastBeans(JavaCodeBuilder builder) throws Exception {
         builder.line();
         builder.annotation("Bean");
-        builder.methodSignature("public", "HazelcastInstance", "hazelcastInstance", "JHipsterProperties jHipsterProperties");
+        builder.methodSignature("public", "HazelcastInstance", "hazelcastInstance");
         builder.statement("Config config = new Config()");
         builder.statement("config.setInstanceName(\"" + getConfig().getBaseName() + "\")");
         builder.statement("config.getNetworkConfig().setPort(5701)");

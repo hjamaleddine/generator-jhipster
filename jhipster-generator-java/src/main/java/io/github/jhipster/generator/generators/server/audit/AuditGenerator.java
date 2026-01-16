@@ -74,7 +74,7 @@ public class AuditGenerator extends BaseApplicationGenerator {
         builder.annotation("EntityListeners", "AuditingEntityListener.class");
         builder.annotation("JsonIgnoreProperties", "value = { \"createdBy\", \"createdDate\", \"lastModifiedBy\", \"lastModifiedDate\" }, allowGetters = true");
 
-        builder.classDeclaration("public abstract", "AbstractAuditingEntity", null, "T", "Serializable");
+        builder.classDeclaration("public abstract", "AbstractAuditingEntity<T>", null, "Serializable");
 
         builder.staticFinalField("long", "serialVersionUID", "1L");
         builder.line();

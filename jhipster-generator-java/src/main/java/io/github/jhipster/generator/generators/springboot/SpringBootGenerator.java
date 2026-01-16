@@ -306,6 +306,7 @@ public class SpringBootGenerator extends BaseApplicationGenerator {
         pom.append("        <java.version>17</java.version>\n");
         pom.append("        <spring-cloud.version>2023.0.0</spring-cloud.version>\n");
         pom.append("        <mapstruct.version>1.5.5.Final</mapstruct.version>\n");
+        pom.append("        <jhipster-framework.version>8.1.0</jhipster-framework.version>\n");
         pom.append("    </properties>\n\n");
 
         // Dependencies
@@ -432,6 +433,28 @@ public class SpringBootGenerator extends BaseApplicationGenerator {
         pom.append("            <groupId>org.mapstruct</groupId>\n");
         pom.append("            <artifactId>mapstruct</artifactId>\n");
         pom.append("            <version>${mapstruct.version}</version>\n");
+        pom.append("        </dependency>\n");
+
+        // JHipster Framework
+        pom.append("\n        <!-- JHipster Framework -->\n");
+        pom.append("        <dependency>\n");
+        pom.append("            <groupId>tech.jhipster</groupId>\n");
+        pom.append("            <artifactId>jhipster-framework</artifactId>\n");
+        pom.append("            <version>${jhipster-framework.version}</version>\n");
+        pom.append("        </dependency>\n");
+
+        // OAuth2 Resource Server (for JwtDecoder)
+        pom.append("\n        <!-- OAuth2 Resource Server -->\n");
+        pom.append("        <dependency>\n");
+        pom.append("            <groupId>org.springframework.boot</groupId>\n");
+        pom.append("            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>\n");
+        pom.append("        </dependency>\n");
+
+        // AOP for logging aspects
+        pom.append("\n        <!-- AOP -->\n");
+        pom.append("        <dependency>\n");
+        pom.append("            <groupId>org.springframework.boot</groupId>\n");
+        pom.append("            <artifactId>spring-boot-starter-aop</artifactId>\n");
         pom.append("        </dependency>\n");
 
         // Testing

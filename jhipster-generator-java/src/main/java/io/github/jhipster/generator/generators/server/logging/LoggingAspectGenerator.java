@@ -61,7 +61,6 @@ public class LoggingAspectGenerator extends BaseApplicationGenerator {
             "org.slf4j.LoggerFactory",
             "org.springframework.core.env.Environment",
             "org.springframework.core.env.Profiles",
-            "tech.jhipster.config.JHipsterConstants",
             "java.util.Arrays"
         );
 
@@ -109,7 +108,7 @@ public class LoggingAspectGenerator extends BaseApplicationGenerator {
         builder.javadoc("Advice that logs methods throwing exceptions.");
         builder.annotation("AfterThrowing", "pointcut = \"applicationPackagePointcut() && springBeanPointcut()\", throwing = \"e\"");
         builder.methodSignature("public", "void", "logAfterThrowing", "JoinPoint joinPoint", "Throwable e");
-        builder.ifStatement("env.acceptsProfiles(Profiles.of(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT))");
+        builder.ifStatement("env.acceptsProfiles(Profiles.of(\"dev\"))");
         builder.statement("logger(joinPoint).error(\"Exception in {}() with cause = '{}' and exception = '{}'\",\n" +
             "                joinPoint.getSignature().getName(),\n" +
             "                e.getCause() != null ? e.getCause() : \"NULL\",\n" +
@@ -126,8 +125,8 @@ public class LoggingAspectGenerator extends BaseApplicationGenerator {
         // Around advice
         builder.javadoc("Advice that logs when a method is entered and exited.");
         builder.annotation("Around", "\"applicationPackagePointcut() && springBeanPointcut()\"");
-        builder.methodSignature("public", "Object", "logAround", "ProceedingJoinPoint joinPoint");
-        builder.statement("throws Throwable");
+        builder.line("public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {");
+        builder.indent();
         builder.statement("Logger log = logger(joinPoint)");
         builder.ifStatement("log.isDebugEnabled()");
         builder.statement("log.debug(\"Enter: {}() with argument[s] = {}\",\n" +
@@ -167,8 +166,7 @@ public class LoggingAspectGenerator extends BaseApplicationGenerator {
             "org.springframework.context.annotation.Configuration",
             "org.springframework.context.annotation.EnableAspectJAutoProxy",
             "org.springframework.context.annotation.Profile",
-            "org.springframework.core.env.Environment",
-            "tech.jhipster.config.JHipsterConstants"
+            "org.springframework.core.env.Environment"
         );
 
         builder.javadoc("Configuration for logging aspects.");
@@ -178,7 +176,7 @@ public class LoggingAspectGenerator extends BaseApplicationGenerator {
         builder.classDeclaration("public", "LoggingAspectConfiguration", null);
 
         builder.annotation("Bean");
-        builder.annotation("Profile", "JHipsterConstants.SPRING_PROFILE_DEVELOPMENT");
+        builder.annotation("Profile", "\"dev\"");
         builder.methodSignature("public", "LoggingAspect", "loggingAspect", "Environment env");
         builder.returnStatement("new LoggingAspect(env)");
         builder.closeMethod();
