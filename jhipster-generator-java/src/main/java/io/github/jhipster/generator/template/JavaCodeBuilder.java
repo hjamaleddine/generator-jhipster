@@ -287,6 +287,17 @@ public class JavaCodeBuilder {
         return this;
     }
 
+    /**
+     * Catch block with combined exception type and variable.
+     * Example: catchBlock("Exception e") or catchBlock("IOException | SQLException ex")
+     */
+    public JavaCodeBuilder catchBlock(String exceptionAndVariable) {
+        outdent();
+        line("} catch (" + exceptionAndVariable + ") {");
+        indent();
+        return this;
+    }
+
     public JavaCodeBuilder catchBlock(String exceptionType, String variable) {
         outdent();
         line("} catch (" + exceptionType + " " + variable + ") {");
@@ -305,6 +316,13 @@ public class JavaCodeBuilder {
         outdent();
         line("}");
         return this;
+    }
+
+    /**
+     * Closes a try block (alias for closeTryCatch).
+     */
+    public JavaCodeBuilder closeTry() {
+        return closeTryCatch();
     }
 
     // ==================== Comments & Javadoc ====================
