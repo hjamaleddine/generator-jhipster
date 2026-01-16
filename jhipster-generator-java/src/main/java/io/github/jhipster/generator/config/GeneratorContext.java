@@ -167,6 +167,13 @@ public class GeneratorContext {
         entities.remove(name);
     }
 
+    public void setEntities(List<EntityConfig> entityList) {
+        entities.clear();
+        for (EntityConfig entity : entityList) {
+            entities.put(entity.getName(), entity);
+        }
+    }
+
     // Shared data methods
 
     @SuppressWarnings("unchecked")
@@ -206,6 +213,30 @@ public class GeneratorContext {
 
     public String getDockerPath() {
         return "src/main/docker/";
+    }
+
+    /**
+     * Returns the base path (alias for getDestinationPath).
+     */
+    public Path getBasePath() {
+        return destinationPath;
+    }
+
+    /**
+     * Returns a simple bean factory for dependency management.
+     * This is a simplified version - in a full implementation,
+     * this would be a proper Spring BeanFactory.
+     */
+    public Object getBeanFactory() {
+        return sharedData;
+    }
+
+    /**
+     * Gets a config value with just the key (returns null if not found).
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getConfigValue(String key) {
+        return (T) sharedData.get(key);
     }
 
     // JSON/YAML utilities

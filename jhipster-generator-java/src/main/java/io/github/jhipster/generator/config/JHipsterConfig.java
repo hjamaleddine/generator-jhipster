@@ -130,6 +130,10 @@ public class JHipsterConfig {
     @JsonProperty("jwtSecretKey")
     private String jwtSecretKey;
 
+    // CI/CD
+    @JsonProperty("ciCd")
+    private String ciCd = "github-actions";
+
     // Additional properties
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -446,6 +450,35 @@ public class JHipsterConfig {
 
     public boolean isEureka() {
         return "eureka".equals(serviceDiscoveryType);
+    }
+
+    public boolean isSkipUserManagement() {
+        return Boolean.TRUE.equals(skipUserManagement);
+    }
+
+    public String getCiCd() {
+        return ciCd;
+    }
+
+    public void setCiCd(String ciCd) {
+        this.ciCd = ciCd;
+    }
+
+    public String getMainClassName() {
+        return getMainClass();
+    }
+
+    public String getHeaderValue(String key) {
+        Object value = additionalProperties.get(key);
+        return value != null ? value.toString() : null;
+    }
+
+    public Object getNetworkConfig(String key) {
+        Object networkConfig = additionalProperties.get("networkConfig");
+        if (networkConfig instanceof Map) {
+            return ((Map<?, ?>) networkConfig).get(key);
+        }
+        return null;
     }
 
     public String getEndpointPrefix() {

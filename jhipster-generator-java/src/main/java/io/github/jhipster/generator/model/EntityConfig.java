@@ -352,6 +352,27 @@ public class EntityConfig {
         return relationships.stream().anyMatch(r -> Boolean.TRUE.equals(r.getRelationshipRequired()));
     }
 
+    public boolean isDto() {
+        return hasDto();
+    }
+
+    public boolean isServiceClass() {
+        return hasService();
+    }
+
+    public boolean isFiltering() {
+        return hasFiltering();
+    }
+
+    public boolean isReadOnly() {
+        return Boolean.TRUE.equals(readOnly);
+    }
+
+    public boolean isBuiltIn() {
+        // User and Authority are built-in entities
+        return "User".equals(name) || "Authority".equals(name);
+    }
+
     // Utility methods
 
     private static String decapitalize(String str) {

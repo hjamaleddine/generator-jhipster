@@ -57,6 +57,12 @@ public class FieldConfig {
     @JsonProperty("fieldValues")
     private String fieldValues;
 
+    @JsonProperty("required")
+    private Boolean required = false;
+
+    @JsonProperty("unique")
+    private Boolean unique = false;
+
     // Computed properties
     private String javaFieldType;
     private String fieldInJavaBeanMethod;
@@ -336,6 +342,38 @@ public class FieldConfig {
 
     public boolean isTemporal() {
         return isLocalDate() || isInstant() || isZonedDateTime() || isDuration();
+    }
+
+    public boolean isRequired() {
+        return Boolean.TRUE.equals(required) || isFieldValidationRequired();
+    }
+
+    public void setRequired(Boolean required) {
+        this.required = required;
+    }
+
+    public boolean isUnique() {
+        return Boolean.TRUE.equals(unique) || hasValidationRule("unique");
+    }
+
+    public void setUnique(Boolean unique) {
+        this.unique = unique;
+    }
+
+    public boolean isEnum() {
+        return isEnumField();
+    }
+
+    public Integer getMinLength() {
+        return fieldValidateRulesMinlength;
+    }
+
+    public Integer getMaxLength() {
+        return fieldValidateRulesMaxlength;
+    }
+
+    public String getPattern() {
+        return fieldValidateRulesPattern;
     }
 
     private String mapToJavaType(String type) {
