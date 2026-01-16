@@ -157,15 +157,26 @@ public abstract class BaseGenerator {
     private final Set<String> mergedGeneratorNames = new HashSet<>();
 
     /**
-     * Merges tasks from all unmerged child generators.
+     * Merges tasks from all unmerged child generators, recursively.
      */
     private void mergeAllChildTasks() {
-        for (BaseGenerator child : childGenerators) {
+        mergeChildTasksRecursively(childGenerators);
+    }
+
+    /**
+     * Recursively merges tasks from child generators and their children.
+     */
+    private void mergeChildTasksRecursively(List<BaseGenerator> generators) {
+        for (BaseGenerator child : generators) {
             if (mergedGeneratorNames.add(child.getName())) {
                 log.debug("Merging tasks from: {}", child.getName());
                 for (Map.Entry<GeneratorPriority, List<GeneratorTask>> entry : child.tasks.entrySet()) {
                     tasks.computeIfAbsent(entry.getKey(), k -> new ArrayList<>())
                         .addAll(entry.getValue());
+                }
+                // Recursively merge grandchildren
+                if (!child.childGenerators.isEmpty()) {
+                    mergeChildTasksRecursively(child.childGenerators);
                 }
             }
         }
