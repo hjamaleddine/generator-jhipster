@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for Server Generator.
+ * ServerGenerator configures server settings and composes with SpringBootGenerator.
  */
 class ServerGeneratorTest {
 
@@ -58,44 +59,86 @@ class ServerGeneratorTest {
     }
 
     @Test
-    @DisplayName("Should generate server application class")
-    void shouldGenerateServerApplicationClass() throws Exception {
+    @DisplayName("Should set default port for microservice")
+    void shouldSetDefaultPortForMicroservice() throws Exception {
         // Given
-        JHipsterConfig config = createConfig();
+        JHipsterConfig config = createMicroserviceConfig();
+        config.setServerPort(null); // Clear to test default
+        GeneratorContext context = new GeneratorContext(testDir, config);
+
+        // When
+        new ServerGenerator(context).run();
+
+        // Then - microservices default to port 8081
+        assertEquals(8081, config.getServerPort());
+    }
+
+    @Test
+    @DisplayName("Should set default port for monolith")
+    void shouldSetDefaultPortForMonolith() throws Exception {
+        // Given
+        JHipsterConfig config = createMonolithConfig();
+        config.setServerPort(null); // Clear to test default
+        GeneratorContext context = new GeneratorContext(testDir, config);
+
+        // When
+        new ServerGenerator(context).run();
+
+        // Then - monoliths default to port 8080
+        assertEquals(8080, config.getServerPort());
+    }
+
+    @Test
+    @DisplayName("Should preserve custom port")
+    void shouldPreserveCustomPort() throws Exception {
+        // Given
+        JHipsterConfig config = createMicroserviceConfig();
+        config.setServerPort(9090);
         GeneratorContext context = new GeneratorContext(testDir, config);
 
         // When
         new ServerGenerator(context).run();
 
         // Then
-        String packagePath = config.getPackageFolder();
-        assertFileExists("src/main/java/" + packagePath + "/" + config.getMainClass() + ".java");
+        assertEquals(9090, config.getServerPort());
     }
 
     @Test
-    @DisplayName("Should generate Spring Boot configuration")
-    void shouldGenerateSpringBootConfiguration() throws Exception {
+    @DisplayName("Should set context values during preparing phase")
+    void shouldSetContextValuesDuringPreparing() throws Exception {
         // Given
-        JHipsterConfig config = createConfig();
+        JHipsterConfig config = createMicroserviceConfig();
         GeneratorContext context = new GeneratorContext(testDir, config);
 
         // When
         new ServerGenerator(context).run();
 
-        // Then
-        assertFileExists("src/main/resources/config/application.yml");
-        assertFileExists("src/main/resources/config/application-dev.yml");
-        assertFileExists("src/main/resources/config/application-prod.yml");
-
-        String appConfig = Files.readString(testDir.resolve("src/main/resources/config/application.yml"));
-        assertTrue(appConfig.contains("spring:") || appConfig.contains("server:"));
+        // Then - verify context has been populated with server values
+        assertNotNull(context.getConfigValue("serverPort"));
+        assertNotNull(context.getConfigValue("authenticationType"));
+        assertNotNull(context.getConfigValue("databaseType"));
     }
 
     @Test
-    @DisplayName("Should generate security configuration for JWT")
-    void shouldGenerateSecurityConfigurationForJwt() throws Exception {
+    @DisplayName("Should return correct generator name")
+    void shouldReturnCorrectGeneratorName() {
         // Given
-        JHipsterConfig config = createConfig();
+        JHipsterConfig config = createMicroserviceConfig();
+        GeneratorContext context = new GeneratorContext(testDir, config);
+        ServerGenerator generator = new ServerGenerator(context);
+
+        // When
+        String name = generator.getName();
+
+        // Then
+        assertEquals("server", name);
+    }
+
+    @Test
+    @DisplayName("Should handle JWT authentication type")
+    void shouldHandleJwtAuthenticationType() throws Exception {
+        // Given
+        JHipsterConfig config = createMicroserviceConfig();
         config.setAuthenticationType("jwt");
         GeneratorContext context = new GeneratorContext(testDir, config);
 
@@ -103,17 +146,14 @@ class ServerGeneratorTest {
         new ServerGenerator(context).run();
 
         // Then
-        String packagePath = config.getPackageFolder();
-        assertFileExists("src/main/java/" + packagePath + "/security/SecurityConfiguration.java");
-        assertFileExists("src/main/java/" + packagePath + "/security/jwt/JWTFilter.java");
-        assertFileExists("src/main/java/" + packagePath + "/security/jwt/TokenProvider.java");
+        assertEquals("jwt", context.getConfigValue("authenticationType"));
     }
 
     @Test
-    @DisplayName("Should generate security configuration for OAuth2")
-    void shouldGenerateSecurityConfigurationForOAuth2() throws Exception {
+    @DisplayName("Should handle OAuth2 authentication type")
+    void shouldHandleOAuth2AuthenticationType() throws Exception {
         // Given
-        JHipsterConfig config = createConfig();
+        JHipsterConfig config = createMicroserviceConfig();
         config.setAuthenticationType("oauth2");
         GeneratorContext context = new GeneratorContext(testDir, config);
 
@@ -121,68 +161,14 @@ class ServerGeneratorTest {
         new ServerGenerator(context).run();
 
         // Then
-        String packagePath = config.getPackageFolder();
-        assertFileExists("src/main/java/" + packagePath + "/security/SecurityConfiguration.java");
-
-        String securityConfig = Files.readString(
-            testDir.resolve("src/main/java/" + packagePath + "/security/SecurityConfiguration.java"));
-        assertTrue(securityConfig.contains("oauth2") || securityConfig.contains("OAuth2"));
+        assertEquals("oauth2", context.getConfigValue("authenticationType"));
     }
 
     @Test
-    @DisplayName("Should generate service discovery configuration for Consul")
-    void shouldGenerateServiceDiscoveryConfigurationForConsul() throws Exception {
+    @DisplayName("Should handle SQL database type")
+    void shouldHandleSqlDatabaseType() throws Exception {
         // Given
-        JHipsterConfig config = createConfig();
-        config.setServiceDiscoveryType("consul");
-        GeneratorContext context = new GeneratorContext(testDir, config);
-
-        // When
-        new ServerGenerator(context).run();
-
-        // Then
-        String appConfig = Files.readString(testDir.resolve("src/main/resources/config/application.yml"));
-        assertTrue(appConfig.contains("consul") || appConfig.contains("cloud"));
-    }
-
-    @Test
-    @DisplayName("Should generate service discovery configuration for Eureka")
-    void shouldGenerateServiceDiscoveryConfigurationForEureka() throws Exception {
-        // Given
-        JHipsterConfig config = createConfig();
-        config.setServiceDiscoveryType("eureka");
-        GeneratorContext context = new GeneratorContext(testDir, config);
-
-        // When
-        new ServerGenerator(context).run();
-
-        // Then
-        String appConfig = Files.readString(testDir.resolve("src/main/resources/config/application.yml"));
-        assertTrue(appConfig.contains("eureka") || appConfig.contains("cloud"));
-    }
-
-    @Test
-    @DisplayName("Should generate cache configuration")
-    void shouldGenerateCacheConfiguration() throws Exception {
-        // Given
-        JHipsterConfig config = createConfig();
-        config.setCacheProvider("ehcache");
-        config.setEnableHibernateCache(true);
-        GeneratorContext context = new GeneratorContext(testDir, config);
-
-        // When
-        new ServerGenerator(context).run();
-
-        // Then
-        String packagePath = config.getPackageFolder();
-        assertFileExists("src/main/java/" + packagePath + "/config/CacheConfiguration.java");
-    }
-
-    @Test
-    @DisplayName("Should generate database configuration for SQL")
-    void shouldGenerateDatabaseConfigurationForSql() throws Exception {
-        // Given
-        JHipsterConfig config = createConfig();
+        JHipsterConfig config = createMicroserviceConfig();
         config.setDatabaseType("sql");
         config.setProdDatabaseType("postgresql");
         GeneratorContext context = new GeneratorContext(testDir, config);
@@ -191,73 +177,58 @@ class ServerGeneratorTest {
         new ServerGenerator(context).run();
 
         // Then
-        String packagePath = config.getPackageFolder();
-        assertFileExists("src/main/java/" + packagePath + "/config/DatabaseConfiguration.java");
+        assertEquals("sql", context.getConfigValue("databaseType"));
+        assertEquals("postgresql", context.getConfigValue("prodDatabaseType"));
     }
 
     @Test
-    @DisplayName("Should generate logging configuration")
-    void shouldGenerateLoggingConfiguration() throws Exception {
+    @DisplayName("Should handle MongoDB database type")
+    void shouldHandleMongodbDatabaseType() throws Exception {
         // Given
-        JHipsterConfig config = createConfig();
+        JHipsterConfig config = createMicroserviceConfig();
+        config.setDatabaseType("mongodb");
         GeneratorContext context = new GeneratorContext(testDir, config);
 
         // When
         new ServerGenerator(context).run();
 
         // Then
-        assertFileExists("src/main/resources/logback-spring.xml");
+        assertEquals("mongodb", context.getConfigValue("databaseType"));
     }
 
     @Test
-    @DisplayName("Should generate exception handling classes")
-    void shouldGenerateExceptionHandlingClasses() throws Exception {
+    @DisplayName("Should handle Maven build tool")
+    void shouldHandleMavenBuildTool() throws Exception {
         // Given
-        JHipsterConfig config = createConfig();
+        JHipsterConfig config = createMicroserviceConfig();
+        config.setBuildTool("maven");
         GeneratorContext context = new GeneratorContext(testDir, config);
 
         // When
         new ServerGenerator(context).run();
 
         // Then
-        String packagePath = config.getPackageFolder();
-        assertFileExists("src/main/java/" + packagePath + "/web/rest/errors/ExceptionTranslator.java");
-        assertFileExists("src/main/java/" + packagePath + "/web/rest/errors/BadRequestAlertException.java");
+        assertEquals("maven", context.getConfigValue("buildTool"));
     }
 
     @Test
-    @DisplayName("Should generate health check endpoints")
-    void shouldGenerateHealthCheckEndpoints() throws Exception {
+    @DisplayName("Should handle Gradle build tool")
+    void shouldHandleGradleBuildTool() throws Exception {
         // Given
-        JHipsterConfig config = createConfig();
+        JHipsterConfig config = createMicroserviceConfig();
+        config.setBuildTool("gradle");
         GeneratorContext context = new GeneratorContext(testDir, config);
 
         // When
         new ServerGenerator(context).run();
 
         // Then
-        String appConfig = Files.readString(testDir.resolve("src/main/resources/config/application.yml"));
-        assertTrue(appConfig.contains("management:") || appConfig.contains("actuator"));
-    }
-
-    @Test
-    @DisplayName("Should generate test infrastructure")
-    void shouldGenerateTestInfrastructure() throws Exception {
-        // Given
-        JHipsterConfig config = createConfig();
-        GeneratorContext context = new GeneratorContext(testDir, config);
-
-        // When
-        new ServerGenerator(context).run();
-
-        // Then
-        String packagePath = config.getPackageFolder();
-        assertFileExists("src/test/java/" + packagePath + "/IntegrationTest.java");
+        assertEquals("gradle", context.getConfigValue("buildTool"));
     }
 
     // Helper methods
 
-    private JHipsterConfig createConfig() {
+    private JHipsterConfig createMicroserviceConfig() {
         JHipsterConfig config = new JHipsterConfig();
         config.setBaseName("servertest");
         config.setPackageName("com.test.server");
@@ -272,8 +243,15 @@ class ServerGeneratorTest {
         return config;
     }
 
-    private void assertFileExists(String relativePath) {
-        Path path = testDir.resolve(relativePath);
-        assertTrue(Files.exists(path), "File should exist: " + relativePath);
+    private JHipsterConfig createMonolithConfig() {
+        JHipsterConfig config = new JHipsterConfig();
+        config.setBaseName("monolithtest");
+        config.setPackageName("com.test.monolith");
+        config.setApplicationType("monolith");
+        config.setDatabaseType("sql");
+        config.setProdDatabaseType("postgresql");
+        config.setAuthenticationType("jwt");
+        config.setBuildTool("maven");
+        return config;
     }
 }
