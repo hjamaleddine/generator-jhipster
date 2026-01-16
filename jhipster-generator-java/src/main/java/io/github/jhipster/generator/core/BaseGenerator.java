@@ -107,6 +107,7 @@ public abstract class BaseGenerator {
 
     /**
      * Runs all registered tasks in priority order.
+     * Handles dynamic composition by merging child generator tasks after each priority.
      */
     public void run() throws Exception {
         log.info("Running generator: {}", getName());
@@ -114,26 +115,60 @@ public abstract class BaseGenerator {
         beforeQueue();
         registerTasks();
 
-        // Merge tasks from child generators
-        for (BaseGenerator child : childGenerators) {
-            for (Map.Entry<GeneratorPriority, List<GeneratorTask>> entry : child.tasks.entrySet()) {
-                tasks.computeIfAbsent(entry.getKey(), k -> new ArrayList<>())
-                    .addAll(entry.getValue());
+        // Merge tasks from generators composed in beforeQueue/registerTasks
+        mergeAllChildTasks();
+
+        // Get priorities in execution order
+        Set<GeneratorPriority> executedPriorities = new HashSet<>();
+
+        while (true) {
+            // Find next priority to execute
+            GeneratorPriority nextPriority = null;
+            for (GeneratorPriority priority : tasks.keySet()) {
+                if (!executedPriorities.contains(priority)) {
+                    nextPriority = priority;
+                    break;
+                }
             }
-        }
 
-        // Execute all tasks in priority order
-        for (Map.Entry<GeneratorPriority, List<GeneratorTask>> entry : tasks.entrySet()) {
-            GeneratorPriority priority = entry.getKey();
-            log.debug("Executing priority: {}", priority);
+            if (nextPriority == null) {
+                break; // All priorities executed
+            }
 
-            for (GeneratorTask task : entry.getValue()) {
+            log.debug("Executing priority: {}", nextPriority);
+
+            // Execute tasks at this priority (create copy to avoid concurrent modification)
+            List<GeneratorTask> tasksAtPriority = new ArrayList<>(tasks.getOrDefault(nextPriority, Collections.emptyList()));
+            for (GeneratorTask task : tasksAtPriority) {
                 log.debug("  Running task: {}", task.getName());
                 task.execute();
             }
+
+            executedPriorities.add(nextPriority);
+
+            // After executing tasks at this priority, merge any newly composed generators
+            // This handles generators composed during COMPOSING phase
+            mergeAllChildTasks();
         }
 
         log.info("Generator {} completed", getName());
+    }
+
+    private final Set<String> mergedGeneratorNames = new HashSet<>();
+
+    /**
+     * Merges tasks from all unmerged child generators.
+     */
+    private void mergeAllChildTasks() {
+        for (BaseGenerator child : childGenerators) {
+            if (mergedGeneratorNames.add(child.getName())) {
+                log.debug("Merging tasks from: {}", child.getName());
+                for (Map.Entry<GeneratorPriority, List<GeneratorTask>> entry : child.tasks.entrySet()) {
+                    tasks.computeIfAbsent(entry.getKey(), k -> new ArrayList<>())
+                        .addAll(entry.getValue());
+                }
+            }
+        }
     }
 
     // ==================== File Operations ====================
