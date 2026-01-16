@@ -12,6 +12,8 @@ package io.github.jhipster.generator.config;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -383,6 +385,12 @@ public class JHipsterConfig {
     }
 
     public String getJwtSecretKey() {
+        if (jwtSecretKey == null || jwtSecretKey.isEmpty()) {
+            // Generate a secure random key (512 bits = 64 bytes for HS512)
+            byte[] keyBytes = new byte[64];
+            new SecureRandom().nextBytes(keyBytes);
+            jwtSecretKey = Base64.getEncoder().encodeToString(keyBytes);
+        }
         return jwtSecretKey;
     }
 
