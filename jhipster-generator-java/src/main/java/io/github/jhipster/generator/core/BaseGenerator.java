@@ -118,35 +118,36 @@ public abstract class BaseGenerator {
         // Merge tasks from generators composed in beforeQueue/registerTasks
         mergeAllChildTasks();
 
-        // Get priorities in execution order
-        Set<GeneratorPriority> executedPriorities = new HashSet<>();
+        // Track executed tasks (not priorities) to handle dynamically added tasks
+        Set<GeneratorTask> executedTasks = new HashSet<>();
 
         while (true) {
-            // Find next priority to execute
+            // Find the next task to execute (lowest priority, not yet executed)
+            GeneratorTask nextTask = null;
             GeneratorPriority nextPriority = null;
-            for (GeneratorPriority priority : tasks.keySet()) {
-                if (!executedPriorities.contains(priority)) {
-                    nextPriority = priority;
+
+            for (Map.Entry<GeneratorPriority, List<GeneratorTask>> entry : tasks.entrySet()) {
+                for (GeneratorTask task : entry.getValue()) {
+                    if (!executedTasks.contains(task)) {
+                        nextTask = task;
+                        nextPriority = entry.getKey();
+                        break;
+                    }
+                }
+                if (nextTask != null) {
                     break;
                 }
             }
 
-            if (nextPriority == null) {
-                break; // All priorities executed
+            if (nextTask == null) {
+                break; // All tasks executed
             }
 
-            log.debug("Executing priority: {}", nextPriority);
+            log.debug("Executing task: {} at priority {}", nextTask.getName(), nextPriority);
+            nextTask.execute();
+            executedTasks.add(nextTask);
 
-            // Execute tasks at this priority (create copy to avoid concurrent modification)
-            List<GeneratorTask> tasksAtPriority = new ArrayList<>(tasks.getOrDefault(nextPriority, Collections.emptyList()));
-            for (GeneratorTask task : tasksAtPriority) {
-                log.debug("  Running task: {}", task.getName());
-                task.execute();
-            }
-
-            executedPriorities.add(nextPriority);
-
-            // After executing tasks at this priority, merge any newly composed generators
+            // After executing each task, merge any newly composed generators
             // This handles generators composed during COMPOSING phase
             mergeAllChildTasks();
         }
