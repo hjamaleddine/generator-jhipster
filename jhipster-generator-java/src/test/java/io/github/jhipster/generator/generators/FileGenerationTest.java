@@ -119,7 +119,7 @@ class FileGenerationTest {
         FieldConfig nameField = new FieldConfig();
         nameField.setFieldName("name");
         nameField.setFieldType("String");
-        nameField.setFieldValidateRules(Arrays.asList("required"));
+        nameField.setFieldValidateRules(new String[]{"required"});
 
         FieldConfig priceField = new FieldConfig();
         priceField.setFieldName("price");
