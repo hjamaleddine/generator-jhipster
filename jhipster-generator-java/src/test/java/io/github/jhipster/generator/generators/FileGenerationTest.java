@@ -157,20 +157,34 @@ class FileGenerationTest {
 
         GeneratorContext context = new GeneratorContext(testDir, config);
 
-        // Add an entity
+        // Add an entity with full configuration for prod-ready generation
         EntityConfig product = new EntityConfig();
         product.setName("Product");
         product.setEntityTableName("product");
+        product.setDto("mapstruct");           // Enable DTO generation
+        product.setService("serviceImpl");     // Enable Service + ServiceImpl generation
+        product.setPagination("pagination");   // Enable pagination
+        product.setJpaMetamodelFiltering(true); // Enable filtering/criteria
 
         FieldConfig nameField = new FieldConfig();
         nameField.setFieldName("name");
         nameField.setFieldType("String");
+        nameField.setFieldValidateRules(new String[]{"required"});
 
-        product.setFields(Arrays.asList(nameField));
+        FieldConfig priceField = new FieldConfig();
+        priceField.setFieldName("price");
+        priceField.setFieldType("BigDecimal");
+
+        FieldConfig descField = new FieldConfig();
+        descField.setFieldName("description");
+        descField.setFieldType("String");
+
+        product.setFields(Arrays.asList(nameField, priceField, descField));
         context.addEntity(product);
 
         // Debug
         System.out.println("Before run - Entities: " + context.getEntities().size());
+        System.out.println("Entity config: dto=" + product.getDto() + ", service=" + product.getService());
 
         // When
         new ServerGenerator(context).run();
@@ -178,23 +192,49 @@ class FileGenerationTest {
         // Debug
         System.out.println("After run - Entities: " + context.getEntities().size());
 
-        // Then - verify both app files and entity were generated
-        Path appClass = testDir.resolve("src/main/java/com/example/full/FullappApp.java");
+        // Then - verify all generated files
+        String basePath = "src/main/java/com/example/full/";
+
+        // Main app class
+        Path appClass = testDir.resolve(basePath + "FullappApp.java");
         assertTrue(Files.exists(appClass), "Main app class should exist: " + appClass);
 
-        Path entityFile = testDir.resolve("src/main/java/com/example/full/domain/Product.java");
-        System.out.println("Expected entity file: " + entityFile);
-        System.out.println("Entity file exists: " + Files.exists(entityFile));
-
-        // List all files in domain directory if it exists
-        Path domainDir = testDir.resolve("src/main/java/com/example/full/domain");
-        if (Files.exists(domainDir)) {
-            System.out.println("Files in domain directory:");
-            Files.list(domainDir).forEach(p -> System.out.println("  " + p.getFileName()));
-        } else {
-            System.out.println("Domain directory does not exist: " + domainDir);
-        }
-
+        // Domain class
+        Path entityFile = testDir.resolve(basePath + "domain/Product.java");
         assertTrue(Files.exists(entityFile), "Entity class should exist: " + entityFile);
+
+        // Repository
+        Path repoFile = testDir.resolve(basePath + "repository/ProductRepository.java");
+        assertTrue(Files.exists(repoFile), "Repository should exist: " + repoFile);
+
+        // Service
+        Path serviceFile = testDir.resolve(basePath + "service/ProductService.java");
+        assertTrue(Files.exists(serviceFile), "Service interface should exist: " + serviceFile);
+
+        // Service Implementation
+        Path serviceImplFile = testDir.resolve(basePath + "service/impl/ProductServiceImpl.java");
+        assertTrue(Files.exists(serviceImplFile), "Service implementation should exist: " + serviceImplFile);
+
+        // DTO
+        Path dtoFile = testDir.resolve(basePath + "service/dto/ProductDTO.java");
+        assertTrue(Files.exists(dtoFile), "DTO should exist: " + dtoFile);
+
+        // Mapper
+        Path mapperFile = testDir.resolve(basePath + "service/mapper/ProductMapper.java");
+        assertTrue(Files.exists(mapperFile), "Mapper should exist: " + mapperFile);
+
+        // REST Controller
+        Path resourceFile = testDir.resolve(basePath + "web/rest/ProductResource.java");
+        assertTrue(Files.exists(resourceFile), "REST controller should exist: " + resourceFile);
+
+        // Criteria (for filtering)
+        Path criteriaFile = testDir.resolve(basePath + "service/criteria/ProductCriteria.java");
+        assertTrue(Files.exists(criteriaFile), "Criteria class should exist: " + criteriaFile);
+
+        // Query Service
+        Path queryServiceFile = testDir.resolve(basePath + "service/ProductQueryService.java");
+        assertTrue(Files.exists(queryServiceFile), "Query service should exist: " + queryServiceFile);
+
+        System.out.println("\n=== Full microservice structure generated successfully! ===");
     }
 }
