@@ -5,6 +5,7 @@ package io.github.jhipster.generator.generators;
 
 import io.github.jhipster.generator.config.GeneratorContext;
 import io.github.jhipster.generator.config.JHipsterConfig;
+import io.github.jhipster.generator.generators.app.AppGenerator;
 import io.github.jhipster.generator.generators.entity.EntityGenerator;
 import io.github.jhipster.generator.model.EntityConfig;
 import io.github.jhipster.generator.model.FieldConfig;
@@ -21,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for Entity Generator.
+ * Note: EntityGenerator saves entity config to .jhipster/ directory.
+ * Full code generation (domain, repository, service, etc.) requires AppGenerator.
  */
 class EntityGeneratorTest {
 
@@ -63,8 +66,8 @@ class EntityGeneratorTest {
     }
 
     @Test
-    @DisplayName("Should generate entity domain class")
-    void shouldGenerateEntityDomainClass() throws Exception {
+    @DisplayName("Should save entity configuration to .jhipster directory")
+    void shouldSaveEntityConfiguration() throws Exception {
         // Given
         JHipsterConfig config = createConfig();
         EntityConfig entityConfig = createProductEntity();
@@ -75,132 +78,59 @@ class EntityGeneratorTest {
         new EntityGenerator(context).run();
 
         // Then
-        String packagePath = config.getPackageFolder();
-        assertFileExists("src/main/java/" + packagePath + "/domain/Product.java");
+        assertFileExists(".jhipster/Product.json");
 
-        String entityContent = Files.readString(
-            testDir.resolve("src/main/java/" + packagePath + "/domain/Product.java"));
-        assertTrue(entityContent.contains("@Entity"));
-        assertTrue(entityContent.contains("public class Product"));
-        assertTrue(entityContent.contains("private String name"));
-        assertTrue(entityContent.contains("private BigDecimal price"));
+        String jsonContent = Files.readString(testDir.resolve(".jhipster/Product.json"));
+        assertTrue(jsonContent.contains("\"name\": \"Product\""));
+        assertTrue(jsonContent.contains("\"entityTableName\": \"product\""));
+        assertTrue(jsonContent.contains("\"fieldName\": \"name\""));
+        assertTrue(jsonContent.contains("\"fieldName\": \"price\""));
     }
 
     @Test
-    @DisplayName("Should generate entity repository")
-    void shouldGenerateEntityRepository() throws Exception {
-        // Given
-        JHipsterConfig config = createConfig();
-        EntityConfig entityConfig = createProductEntity();
-        GeneratorContext context = new GeneratorContext(testDir, config);
-        context.addEntity(entityConfig);
-
-        // When
-        new EntityGenerator(context).run();
-
-        // Then
-        String packagePath = config.getPackageFolder();
-        assertFileExists("src/main/java/" + packagePath + "/repository/ProductRepository.java");
-
-        String repoContent = Files.readString(
-            testDir.resolve("src/main/java/" + packagePath + "/repository/ProductRepository.java"));
-        assertTrue(repoContent.contains("@Repository"));
-        assertTrue(repoContent.contains("interface ProductRepository"));
-        assertTrue(repoContent.contains("JpaRepository"));
-    }
-
-    @Test
-    @DisplayName("Should generate entity service when service layer enabled")
-    void shouldGenerateEntityService() throws Exception {
-        // Given
-        JHipsterConfig config = createConfig();
-        config.setService("serviceImpl");
-        EntityConfig entityConfig = createProductEntity();
-        GeneratorContext context = new GeneratorContext(testDir, config);
-        context.addEntity(entityConfig);
-
-        // When
-        new EntityGenerator(context).run();
-
-        // Then
-        String packagePath = config.getPackageFolder();
-        assertFileExists("src/main/java/" + packagePath + "/service/ProductService.java");
-        assertFileExists("src/main/java/" + packagePath + "/service/impl/ProductServiceImpl.java");
-    }
-
-    @Test
-    @DisplayName("Should generate entity DTO when DTO layer enabled")
-    void shouldGenerateEntityDto() throws Exception {
-        // Given
-        JHipsterConfig config = createConfig();
-        config.setDto("mapstruct");
-        EntityConfig entityConfig = createProductEntity();
-        GeneratorContext context = new GeneratorContext(testDir, config);
-        context.addEntity(entityConfig);
-
-        // When
-        new EntityGenerator(context).run();
-
-        // Then
-        String packagePath = config.getPackageFolder();
-        assertFileExists("src/main/java/" + packagePath + "/service/dto/ProductDTO.java");
-        assertFileExists("src/main/java/" + packagePath + "/service/mapper/ProductMapper.java");
-    }
-
-    @Test
-    @DisplayName("Should generate entity REST controller")
-    void shouldGenerateEntityRestController() throws Exception {
-        // Given
-        JHipsterConfig config = createConfig();
-        EntityConfig entityConfig = createProductEntity();
-        GeneratorContext context = new GeneratorContext(testDir, config);
-        context.addEntity(entityConfig);
-
-        // When
-        new EntityGenerator(context).run();
-
-        // Then
-        String packagePath = config.getPackageFolder();
-        assertFileExists("src/main/java/" + packagePath + "/web/rest/ProductResource.java");
-
-        String resourceContent = Files.readString(
-            testDir.resolve("src/main/java/" + packagePath + "/web/rest/ProductResource.java"));
-        assertTrue(resourceContent.contains("@RestController"));
-        assertTrue(resourceContent.contains("@RequestMapping"));
-        assertTrue(resourceContent.contains("@GetMapping"));
-        assertTrue(resourceContent.contains("@PostMapping"));
-        assertTrue(resourceContent.contains("@PutMapping"));
-        assertTrue(resourceContent.contains("@DeleteMapping"));
-    }
-
-    @Test
-    @DisplayName("Should generate entity with validation annotations")
-    void shouldGenerateEntityWithValidation() throws Exception {
-        // Given
-        JHipsterConfig config = createConfig();
-        EntityConfig entityConfig = createProductEntity();
-        // Make name required
-        entityConfig.getFields().get(0).setRequired(true);
-        GeneratorContext context = new GeneratorContext(testDir, config);
-        context.addEntity(entityConfig);
-
-        // When
-        new EntityGenerator(context).run();
-
-        // Then
-        String packagePath = config.getPackageFolder();
-        String entityContent = Files.readString(
-            testDir.resolve("src/main/java/" + packagePath + "/domain/Product.java"));
-        assertTrue(entityContent.contains("@NotNull") || entityContent.contains("@Column(nullable = false)"));
-    }
-
-    @Test
-    @DisplayName("Should generate entity with relationship")
-    void shouldGenerateEntityWithRelationship() throws Exception {
+    @DisplayName("Should save multiple entity configurations")
+    void shouldSaveMultipleEntityConfigurations() throws Exception {
         // Given
         JHipsterConfig config = createConfig();
         EntityConfig productEntity = createProductEntity();
         EntityConfig categoryEntity = createCategoryEntity();
+        GeneratorContext context = new GeneratorContext(testDir, config);
+        context.addEntity(productEntity);
+        context.addEntity(categoryEntity);
+
+        // When
+        new EntityGenerator(context).run();
+
+        // Then
+        assertFileExists(".jhipster/Product.json");
+        assertFileExists(".jhipster/Category.json");
+    }
+
+    @Test
+    @DisplayName("Should include field validation rules in entity config")
+    void shouldIncludeFieldValidationRules() throws Exception {
+        // Given
+        JHipsterConfig config = createConfig();
+        EntityConfig entityConfig = createProductEntity();
+        // Fields are already set with required=true
+        GeneratorContext context = new GeneratorContext(testDir, config);
+        context.addEntity(entityConfig);
+
+        // When
+        new EntityGenerator(context).run();
+
+        // Then
+        String jsonContent = Files.readString(testDir.resolve(".jhipster/Product.json"));
+        assertTrue(jsonContent.contains("\"fieldValidateRules\"") ||
+                   jsonContent.contains("required"));
+    }
+
+    @Test
+    @DisplayName("Should include relationships in entity config")
+    void shouldIncludeRelationshipsInEntityConfig() throws Exception {
+        // Given
+        JHipsterConfig config = createConfig();
+        EntityConfig productEntity = createProductEntity();
 
         // Add relationship Product -> Category
         RelationshipConfig relationship = new RelationshipConfig();
@@ -212,25 +142,38 @@ class EntityGeneratorTest {
 
         GeneratorContext context = new GeneratorContext(testDir, config);
         context.addEntity(productEntity);
-        context.addEntity(categoryEntity);
 
         // When
         new EntityGenerator(context).run();
 
         // Then
-        String packagePath = config.getPackageFolder();
-        String productContent = Files.readString(
-            testDir.resolve("src/main/java/" + packagePath + "/domain/Product.java"));
-        assertTrue(productContent.contains("@ManyToOne") || productContent.contains("Category category"));
+        String jsonContent = Files.readString(testDir.resolve(".jhipster/Product.json"));
+        assertTrue(jsonContent.contains("\"relationshipName\": \"category\""));
+        assertTrue(jsonContent.contains("\"otherEntityName\": \"Category\""));
+        assertTrue(jsonContent.contains("\"relationshipType\": \"many-to-one\""));
     }
 
     @Test
-    @DisplayName("Should generate Liquibase changelog for entity")
-    void shouldGenerateLiquibaseChangelog() throws Exception {
+    @DisplayName("EntityGenerator with single entity constructor should work")
+    void entityGeneratorWithSingleEntityConstructor() throws Exception {
         // Given
         JHipsterConfig config = createConfig();
-        config.setDatabaseType("sql");
         EntityConfig entityConfig = createProductEntity();
+        GeneratorContext context = new GeneratorContext(testDir, config);
+
+        // When - using the two-parameter constructor
+        new EntityGenerator(context, entityConfig).run();
+
+        // Then
+        assertFileExists(".jhipster/Product.json");
+    }
+
+    @Test
+    @DisplayName("Should handle entity with no relationships")
+    void shouldHandleEntityWithNoRelationships() throws Exception {
+        // Given
+        JHipsterConfig config = createConfig();
+        EntityConfig entityConfig = createCategoryEntity();
         GeneratorContext context = new GeneratorContext(testDir, config);
         context.addEntity(entityConfig);
 
@@ -238,19 +181,19 @@ class EntityGeneratorTest {
         new EntityGenerator(context).run();
 
         // Then
-        // Check for Liquibase changelog (may vary based on implementation)
-        Path changelogDir = testDir.resolve("src/main/resources/config/liquibase/changelog");
-        if (Files.exists(changelogDir)) {
-            assertTrue(Files.list(changelogDir).count() > 0);
-        }
+        assertFileExists(".jhipster/Category.json");
+        String jsonContent = Files.readString(testDir.resolve(".jhipster/Category.json"));
+        assertTrue(jsonContent.contains("\"relationships\": ["));
     }
 
     @Test
-    @DisplayName("Should generate entity integration test")
-    void shouldGenerateEntityIntegrationTest() throws Exception {
+    @DisplayName("Should include DTO and service settings")
+    void shouldIncludeDtoAndServiceSettings() throws Exception {
         // Given
         JHipsterConfig config = createConfig();
         EntityConfig entityConfig = createProductEntity();
+        entityConfig.setDto("mapstruct");
+        entityConfig.setService("serviceImpl");
         GeneratorContext context = new GeneratorContext(testDir, config);
         context.addEntity(entityConfig);
 
@@ -258,34 +201,9 @@ class EntityGeneratorTest {
         new EntityGenerator(context).run();
 
         // Then
-        String packagePath = config.getPackageFolder();
-        assertFileExists("src/test/java/" + packagePath + "/web/rest/ProductResourceIT.java");
-
-        String testContent = Files.readString(
-            testDir.resolve("src/test/java/" + packagePath + "/web/rest/ProductResourceIT.java"));
-        assertTrue(testContent.contains("@SpringBootTest") || testContent.contains("@IntegrationTest"));
-    }
-
-    @Test
-    @DisplayName("Should handle multiple entities")
-    void shouldHandleMultipleEntities() throws Exception {
-        // Given
-        JHipsterConfig config = createConfig();
-        EntityConfig productEntity = createProductEntity();
-        EntityConfig categoryEntity = createCategoryEntity();
-        GeneratorContext context = new GeneratorContext(testDir, config);
-        context.addEntity(productEntity);
-        context.addEntity(categoryEntity);
-
-        // When
-        new EntityGenerator(context).run();
-
-        // Then
-        String packagePath = config.getPackageFolder();
-        assertFileExists("src/main/java/" + packagePath + "/domain/Product.java");
-        assertFileExists("src/main/java/" + packagePath + "/domain/Category.java");
-        assertFileExists("src/main/java/" + packagePath + "/repository/ProductRepository.java");
-        assertFileExists("src/main/java/" + packagePath + "/repository/CategoryRepository.java");
+        String jsonContent = Files.readString(testDir.resolve(".jhipster/Product.json"));
+        assertTrue(jsonContent.contains("\"dto\":") || jsonContent.contains("mapstruct"));
+        assertTrue(jsonContent.contains("\"service\":") || jsonContent.contains("serviceClass"));
     }
 
     // Helper methods
