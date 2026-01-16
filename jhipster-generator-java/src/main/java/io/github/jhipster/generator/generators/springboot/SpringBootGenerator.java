@@ -488,6 +488,23 @@ public class SpringBootGenerator extends BaseApplicationGenerator {
         pom.append("            <scope>test</scope>\n");
         pom.append("        </dependency>\n");
 
+        // Database-specific testcontainers
+        if (isSql()) {
+            String tcModule = switch (config.getProdDatabaseType()) {
+                case "postgresql" -> "postgresql";
+                case "mysql" -> "mysql";
+                case "mariadb" -> "mariadb";
+                case "mssql" -> "mssqlserver";
+                case "oracle" -> "oracle-xe";
+                default -> "postgresql";
+            };
+            pom.append("        <dependency>\n");
+            pom.append("            <groupId>org.testcontainers</groupId>\n");
+            pom.append("            <artifactId>").append(tcModule).append("</artifactId>\n");
+            pom.append("            <scope>test</scope>\n");
+            pom.append("        </dependency>\n");
+        }
+
         pom.append("    </dependencies>\n\n");
 
         // Dependency Management
