@@ -741,12 +741,9 @@ public class SpringBootGenerator extends BaseApplicationGenerator {
 
         yml.append("logging:\n");
         yml.append("  level:\n");
-        yml.append("    ROOT: DEBUG\n");
+        yml.append("    ROOT: INFO\n");
         yml.append("    ").append(config.getPackageName()).append(": DEBUG\n");
-        yml.append("    javax.management: WARN\n");
-        yml.append("    sun.rmi: WARN\n");
-        yml.append("    org.apache.catalina.core.AprLifecycleListener: WARN\n");
-        yml.append("    org.apache.tomcat.jni: WARN\n");
+        yml.append("    org.hibernate.SQL: DEBUG\n");
 
         if (isSql()) {
             yml.append("\nspring:\n");
